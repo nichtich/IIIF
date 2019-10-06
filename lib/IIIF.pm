@@ -1,7 +1,5 @@
 package IIIF;
-use 5.008001;
-use strict;
-use warnings;
+use 5.014001;
 
 our $VERSION = "0.01";
 
@@ -46,13 +44,15 @@ IIIF - IIIF Image API implementation
 
 Module IIIF provides an implementation of L<IIIF Image API|https://iiif.io/api/image/3.0/>.
 
+The implementation is based on L<ImageMagick|https://www.imagemagick.org/> to be installed.
+
 =head1 FUNCTIONS
 
 =head2 info( $file, id => $id, profile => $profile )
 
-Returns L<https://iiif.io/api/image/3.0/#5-image-information|image information>
+Returns L<image information|https://iiif.io/api/image/3.0/#5-image-information>
 object with fields C<@context>, C<type>, C<protocol>, C<width>, and C<height>.
-C<id> and C<profile> must be added to get full IIIF compliant image information.
+Fields C<id> and C<profile> must be added for full IIIF compliance.
 
 =head1 LICENSE
 
