@@ -4,8 +4,7 @@ use Plack::Test;
 use HTTP::Request::Common;
 use IIIF::ImageAPI;
 
-use IPC::Cmd "can_run";
-plan skip_all => "ImageMagick's identify missing" unless can_run "identify";
+plan skip_all => "ImageMagick missing" unless IIIF::available();
 
 my $app = IIIF::ImageAPI->new(root => 't/img');
 my $identifier = "67352ccc-d1b0-11e1-89ae-279075081939";

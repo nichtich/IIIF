@@ -4,9 +4,14 @@ use 5.014001;
 our $VERSION = "0.01";
 
 use Exporter;
-our @EXPORT_OK = qw(info);
+our @EXPORT_OK = qw(info available);
 
+use IPC::Cmd;
 use IPC::Run3;
+
+sub available {
+    return IPC::Cmd::can_run "identify";
+}
 
 sub info {
     my $file = shift;
@@ -38,7 +43,7 @@ IIIF - IIIF Image API implementation
 
     use IIIF;
 
-    my $info = IIIF::info($file, profile => "level0", id => "...") ;
+    my $info = IIIF::info($file, profile => " level0 ", id => " ... ") ;
 
 =head1 DESCRIPTION
 
@@ -53,6 +58,10 @@ The implementation is based on L<ImageMagick|https://www.imagemagick.org/> to be
 Returns L<image information|https://iiif.io/api/image/3.0/#5-image-information>
 object with fields C<@context>, C<type>, C<protocol>, C<width>, and C<height>.
 Fields C<id> and C<profile> must be added for full IIIF compliance.
+
+=head2 available
+
+Returns whether implementation will not throw an error because of missing ImageMagick.
 
 =head1 LICENSE
 
