@@ -9,15 +9,28 @@ IIIF - IIIF Image API implementation
 
 # DESCRIPTION
 
-Module IIIF provides an implementation of [IIIF Image API](https://iiif.io/api/image/3.0/).
-
-The implementation is based on [ImageMagick](https://www.imagemagick.org/) to be installed.
+Module IIIF provides an implementation of [IIIF ImageAPI](https://iiif.io/api/image/3.0/)
+based on the [ImageMagick](https://www.imagemagick.org/) command line application.
 
 # MODULES
 
-- [IIIF::Magick](https://metacpan.org/pod/IIIF::Magick)
 - [IIIF::Request](https://metacpan.org/pod/IIIF::Request)
+
+    parse and express an IIIF Image API request build of region, size, rotation, quality, and format
+
+- [IIIF::Magick](https://metacpan.org/pod/IIIF::Magick)
+
+    get image information and convert images as specified with IIIF Image API request using ImageMagick
+
 - [IIIF::ImageAPI](https://metacpan.org/pod/IIIF::ImageAPI)
+
+    provide a [PSGI](https://metacpan.org/pod/PSGI) web service to access images via IIIF Image API
+
+# SEE ALSO
+
+- [https://github.com/IIIF/awesome-iiif](https://github.com/IIIF/awesome-iiif)
+- [Image::Magick](https://metacpan.org/pod/Image::Magick)
+- [Plack::App::ImageMagick](https://metacpan.org/pod/Plack::App::ImageMagick)
 
 # LICENSE
 

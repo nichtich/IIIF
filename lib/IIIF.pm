@@ -23,19 +23,36 @@ IIIF - IIIF Image API implementation
 
 =head1 DESCRIPTION
 
-Module IIIF provides an implementation of L<IIIF Image API|https://iiif.io/api/image/3.0/>.
-
-The implementation is based on L<ImageMagick|https://www.imagemagick.org/> to be installed.
+Module IIIF provides an implementation of L<IIIF ImageAPI|https://iiif.io/api/image/3.0/>
+based on the L<ImageMagick|https://www.imagemagick.org/> command line application.
 
 =head1 MODULES
 
 =over
 
-=item L<IIIF::Magick>
-
 =item L<IIIF::Request>
 
+parse and express an IIIF Image API request build of region, size, rotation, quality, and format
+
+=item L<IIIF::Magick>
+
+get image information and convert images as specified with IIIF Image API request using ImageMagick
+
 =item L<IIIF::ImageAPI>
+
+provide a L<PSGI> web service to access images via IIIF Image API
+
+=back
+
+=head1 SEE ALSO
+
+=over
+
+=item L<https://github.com/IIIF/awesome-iiif>
+
+=item L<Image::Magick>
+
+=item L<Plack::App::ImageMagick>
 
 =back
 

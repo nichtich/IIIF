@@ -59,6 +59,12 @@ sub args {
         @args = ( '-crop', "${w}x$h%+$x+$y" );
     }
 
+    # apply rotation
+    push @args, '-flop' if $req->{mirror};
+    if ( $req->{degree} ) {
+        push @args, '-rotate', $req->{degree}, '-background', 'none';
+    }
+
     if (@args) {
         say STDERR "\n", join ' ', map { shell_quote($_) } @args;
     }
