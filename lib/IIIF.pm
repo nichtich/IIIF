@@ -39,11 +39,20 @@ __END__
 
 IIIF - IIIF Image API implementation
 
+=begin markdown 
+
+[![Linux Build Status](https://travis-ci.com/nichtich/IIIF.svg?branch=master)](https://travis-ci.com/nichtich/IIIF)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/dko0d7647jvfgu8w?svg=true)](https://ci.appveyor.com/project/nichtich/iiif)
+[![Coverage Status](https://coveralls.io/repos/nichtich/IIIF/badge.svg)](https://coveralls.io/r/nichtich/IIIF)
+[![Kwalitee Score](http://cpants.cpanauthors.org/dist/IIIF.png)](http://cpants.cpanauthors.org/dist/IIIF)
+
+=end markdown
+
 =head1 SYNOPSIS
 
     use IIIF;
 
-    my $info = IIIF::info($file, profile => " level0 ", id => " ... ") ;
+    my $info = IIIF::info($file, profile => "level0", id => "...") ;
 
 =head1 DESCRIPTION
 

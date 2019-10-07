@@ -42,16 +42,30 @@
       },
       "runtime" : {
          "requires" : {
-            "perl" : "5.008001"
+            "IPC::Run3" : "0",
+            "Plack" : "1.0",
+            "perl" : "5.014001"
          }
       },
       "test" : {
          "requires" : {
+            "HTTP::Request::Common" : "0",
             "Test::More" : "0.98"
          }
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/nichtich/IIIF/issues"
+      },
+      "homepage" : "https://github.com/nichtich/IIIF",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/nichtich/IIIF.git",
+         "web" : "https://github.com/nichtich/IIIF"
+      }
+   },
    "version" : "0.01",
    "x_static_install" : 1
 }

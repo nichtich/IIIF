@@ -2,6 +2,11 @@
 
 IIIF - IIIF Image API implementation
 
+[![Linux Build Status](https://travis-ci.com/nichtich/IIIF.svg?branch=master)](https://travis-ci.com/nichtich/IIIF)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/dko0d7647jvfgu8w?svg=true)](https://ci.appveyor.com/project/nichtich/iiif)
+[![Coverage Status](https://coveralls.io/repos/nichtich/IIIF/badge.svg)](https://coveralls.io/r/nichtich/IIIF)
+[![Kwalitee Score](http://cpants.cpanauthors.org/dist/IIIF.png)](http://cpants.cpanauthors.org/dist/IIIF)
+
 # SYNOPSIS
 
     use IIIF;
@@ -12,13 +17,19 @@ IIIF - IIIF Image API implementation
 
 Module IIIF provides an implementation of [IIIF Image API](https://iiif.io/api/image/3.0/).
 
+The implementation is based on [ImageMagick](https://www.imagemagick.org/) to be installed.
+
 # FUNCTIONS
 
 ## info( $file, id => $id, profile => $profile )
 
-Returns [https://iiif.io/api/image/3.0/#5-image-information](https://metacpan.org/pod/image&#x20;information)
+Returns [image information](https://iiif.io/api/image/3.0/#5-image-information)
 object with fields `@context`, `type`, `protocol`, `width`, and `height`.
-`id` and `profile` must be added to get full IIIF compliant image information.
+Fields `id` and `profile` must be added for full IIIF compliance.
+
+## available
+
+Returns whether implementation will not throw an error because of missing ImageMagick.
 
 # LICENSE
 
@@ -30,11 +41,3 @@ it under the same terms as Perl itself.
 # AUTHOR
 
 Jakob Voss <voss@gbv.de>
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 53:
-
-    alternative text 'https://iiif.io/api/image/3.0/#5-image-information' contains non-escaped | or /
