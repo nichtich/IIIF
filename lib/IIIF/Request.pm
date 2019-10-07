@@ -8,7 +8,7 @@ use Plack::Util::Accessor qw(region size rotation quality format);
 our $INT    = qr{[0-9]+};                   # also allows 0
 our $PCT    = qr{[0-9]+|[0-9]*\.[0-9]+};    # also allows 0 and >100
 our $DEGREE = $PCT;
-our $REGION   = qr{full|square|($INT,$INT,$INT,$INT)|pct:($PCT,$PCT,$INT,$INT)};
+our $REGION   = qr{full|square|($INT,$INT,$INT,$INT)|pct:($PCT,$PCT,$PCT,$PCT)};
 our $SIZE     = qr{\^?(max|$INT,|,$INT|pct:$PCT|[!]?$INT,$INT)};
 our $ROTATION = qr{[!]?$DEGREE};
 our $QUALITY  = qr{color|gray|bitonal|default};

@@ -6,6 +6,7 @@ my @tests = (
     max => 'full/max/0/default',
     42  => 'full/max/42/default',
     'square/1,' => 'square/1,/0/default',
+    'pct:41.6,7.5,40,70' => 'pct:41.6,7.5,40,70/max/0/default',
 );
 
 while (@tests) {

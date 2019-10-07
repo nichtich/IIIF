@@ -8,6 +8,7 @@ our @ISA    = qw(Exporter);
 our @EXPORT = qw(info available convert);
 
 use IPC::Cmd qw(can_run);
+use List::Util qw(min);
 
 sub available {
     return can_run("magick") || ( can_run("identify") && can_run("convert") );
@@ -32,24 +33,42 @@ sub info {
 }
 
 sub args {
-    my ($req) = @_;
+    my ( $req, $file ) = @_;
 
     my @args;
 
-    if ( $req->{region} ne 'full' ) {
-        my $crop;
-        if ( my $px = $req->{region_px} ) {
-            $crop = "$px->[2]x$px->[3]+$px->[0]x$px->[1]";
+    # apply region
+    if ( $req->{region} eq 'square' ) {
+        my $info = info($file);
+        if ( $info->{width} ne $info->{height} ) {
+            my $size = min( $info->{width}, $info->{height} );
+            @args = ( qw(-gravity center -crop), "${size}x${size}+0+0" );
         }
-        push @args, '-crop', $crop if defined $crop;
+    }
+    elsif ( my $region_px = $req->{region_px} ) {
+        my ( $x, $y, $w, $h ) = @$region_px;
+        @args = ( '-crop', "${w}x$h+$x+$y" );
+    }
+    elsif ( my $region_pct = $req->{region_pct} ) {
+        my ( $x, $y, $w, $h ) = @$region_pct;
+
+        my $info = info($file);
+        $x = int( 0.01 * $x * $info->{width} );
+        $y = int( 0.01 * $y * $info->{height} );
+
+        @args = ( '-crop', "${w}x$h%+$x+$y" );
     }
 
-    return @args;
+    if (@args) {
+        say STDERR "\n", join ' ', map { shell_quote($_) } @args;
+    }
+
+    return @args, $file;
 }
 
 sub convert {
     my ( $req, $in, $out ) = @_;
-    run( 'convert', args($req), $in, $out );
+    run( 'convert', args( $req, $in ), $out );
     return !$?;
 }
 
@@ -66,7 +85,7 @@ sub shell_quote {
         return qq("$arg");
     }
     else {
-        if ( $arg =~ /\A[\w,_+-]+\z/ ) {
+        if ( $arg =~ qr{\A[\w,_+/-]+\z} ) {
             return $arg;
         }
         $arg =~ s/'/'"'"'/g;
