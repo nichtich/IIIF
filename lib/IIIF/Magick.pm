@@ -5,7 +5,7 @@ our $VERSION = "0.01";
 
 use Exporter;
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(info available);
+our @EXPORT = qw(info available convert);
 
 use IPC::Cmd qw(can_run);
 
@@ -26,7 +26,7 @@ sub info {
         type       => 'ImageService3',
         protocol   => 'http://iiif.io/api/image',
         width      => 1 * $1,
-        height     => 1 * $1,
+        height     => 1 * $2,
         @_
     };
 }
@@ -47,6 +47,12 @@ sub args {
     return @args;
 }
 
+sub convert {
+    my ( $req, $in, $out ) = @_;
+    run( 'convert', args($req), $in, $out );
+    return !$?;
+}
+
 # adopted from <https://metacpan.org/release/ShellQuote-Any-Tiny>
 sub shell_quote {
     my $arg = shift;
@@ -60,7 +66,7 @@ sub shell_quote {
         return qq("$arg");
     }
     else {
-        if ( $arg =~ /\A\w+\z/ ) {
+        if ( $arg =~ /\A[\w,_+-]+\z/ ) {
             return $arg;
         }
         $arg =~ s/'/'"'"'/g;

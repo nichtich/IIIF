@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+use v5.14.1;
+use IIIF::Request;
+use IIIF::Magick qw(info convert);
+use JSON::PP;
+
+if ( !@ARGV ) {
+    say "usage: i3f [file] [{region}/{size}/{rotation}/{quality}.{format} [target]]";
+    exit;
+}
+
+if ( -f $ARGV[0] ) {
+    my $file = shift @ARGV;
+    if (@ARGV) {
+        my $req = IIIF::Request->new( shift @ARGV );
+        exit !convert( $req, $file, @ARGV );
+    } else {
+        my $info = info( $file, profile => 'level0', id => $file );
+        print JSON::PP->new->pretty->canonical->encode($info);
+    }
+} else {
+    my $req = IIIF::Request->new( shift @ARGV );
+    say 'convert ' . join ' ', map { IIIF::Magick::shell_quote($_) } IIIF::Magick::args($req);
+}

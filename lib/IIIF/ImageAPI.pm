@@ -17,6 +17,7 @@ sub call {
     my $req = Plack::Request->new($env);
 
     my $path = $req->path_info;    # /identifier/...
+
     if ( $path =~ qr{^/([^/]+)(.*)} ) {
         my ( $identifier, $local ) = ( $1, $2 );
 
@@ -28,7 +29,9 @@ sub call {
             }
             elsif ( $local eq '/info.json' ) {
                 my $info = info( $file, protocol => 'level0', id => $id );
-                return info_response($info);
+                return json_response( $info, 200,
+'application/ld+json;profile="http://iiif.io/api/image/3/context.json'
+                );
             }
             else {
                 # TODO
@@ -36,7 +39,7 @@ sub call {
         }
     }
 
-    return http_response_404();
+    return error_response( 404, "Not Found" );
 }
 
 sub file {
@@ -50,27 +53,21 @@ sub file {
     }
 }
 
-sub info_response {
-    state $JSON = JSON::PP->new->pretty;
+sub error_response {
+    my ( $code, $message ) = @_;
 
-    [
-        200,
-        [
-            'Content-Type' =>
-'application/ld+json;profile="http://iiif.io/api/image/3/context.json'
-        ],
-        [ $JSON->encode(@_) ]
-    ];
+    json_response( { message => $message }, $code );
 }
 
-sub http_response_404 {
+sub json_response {
+    my ( $body, $code, $type ) = @_;
+
+    state $JSON = JSON::PP->new->pretty->canonical(1);
+
     [
-        404,
-        [
-            'Content-Type'   => 'text/plain',
-            'Content-Length' => 12,
-        ],
-        ['404 Not Found']
+        $code // 200,
+        [ 'Content-Type' => $type // 'application/json' ],
+        [ $JSON->encode($body) ]
     ];
 }
 
