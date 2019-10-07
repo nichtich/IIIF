@@ -2,9 +2,10 @@ use strict;
 use Test::More 0.98;
 use Plack::Test;
 use HTTP::Request::Common;
+use IIIF::Magick;
 use IIIF::ImageAPI;
 
-plan skip_all => "ImageMagick missing" unless IIIF::available();
+plan skip_all => "ImageMagick missing" unless IIIF::Magick::available();
 
 my $app = IIIF::ImageAPI->new(root => 't/img');
 my $identifier = "67352ccc-d1b0-11e1-89ae-279075081939";

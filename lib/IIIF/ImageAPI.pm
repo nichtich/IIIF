@@ -6,7 +6,7 @@ our $VERSION = "0.01";
 use parent 'Plack::Component';
 use Plack::Util::Accessor qw(root);
 
-use IIIF;
+use IIIF::Magick qw(info);
 use File::Spec;
 use Try::Tiny;
 use Plack::Request;
@@ -27,7 +27,7 @@ sub call {
                 return [ 303, [ Location => $id . '/info.json' ], [] ];
             }
             elsif ( $local eq '/info.json' ) {
-                my $info = IIIF::info( $file, protocol => 'level0', id => $id );
+                my $info = info( $file, protocol => 'level0', id => $id );
                 return info_response($info);
             }
             else {

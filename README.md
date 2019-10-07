@@ -7,29 +7,17 @@ IIIF - IIIF Image API implementation
 [![Coverage Status](https://coveralls.io/repos/nichtich/IIIF/badge.svg)](https://coveralls.io/r/nichtich/IIIF)
 [![Kwalitee Score](http://cpants.cpanauthors.org/dist/IIIF.png)](http://cpants.cpanauthors.org/dist/IIIF)
 
-# SYNOPSIS
-
-    use IIIF;
-
-    my $info = IIIF::info($file, profile => "level0", id => "...") ;
-
 # DESCRIPTION
 
 Module IIIF provides an implementation of [IIIF Image API](https://iiif.io/api/image/3.0/).
 
 The implementation is based on [ImageMagick](https://www.imagemagick.org/) to be installed.
 
-# FUNCTIONS
+# MODULES
 
-## info( $file, id => $id, profile => $profile )
-
-Returns [image information](https://iiif.io/api/image/3.0/#5-image-information)
-object with fields `@context`, `type`, `protocol`, `width`, and `height`.
-Fields `id` and `profile` must be added for full IIIF compliance.
-
-## available
-
-Returns whether implementation will not throw an error because of missing ImageMagick.
+- [IIIF::Magick](https://metacpan.org/pod/IIIF::Magick)
+- [IIIF::Request](https://metacpan.org/pod/IIIF::Request)
+- [IIIF::ImageAPI](https://metacpan.org/pod/IIIF::ImageAPI)
 
 # LICENSE
 
