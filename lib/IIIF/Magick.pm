@@ -65,6 +65,14 @@ sub args {
         push @args, '-rotate', $req->{degree}, '-background', 'none';
     }
 
+    # apply quality
+    if ( $req->{quality} eq 'gray' ) {
+        push @args, qw(-colorspace Gray);
+    }
+    elsif ( $req->{quality} eq 'bitonal' ) {
+        push @args, qw(-monochrome -colors 2);
+    }
+
     if (@args) {
         say STDERR "\n", join ' ', map { shell_quote($_) } @args;
     }
