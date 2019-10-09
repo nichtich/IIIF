@@ -45,17 +45,13 @@ sub new {
 
         if ( defined $3 ) {
             $size_pct = 1 * $3;
-            $size = $upscale ? "^pct:$size_pct" : "pct:$size_pct";
-        }
-
-        if ( !$upscale ) {
-            if ( defined $size_pct ) {
+            if ($upscale) {
+                $size = "^pct:$size_pct";
+            }
+            else {
                 die "invalid percentage in IIIF API request: $path"
                   if $size_pct == 0.0 || $size_pct > 100.0;
-            }
-            elsif ( defined $size_px ) {
-
-                # TODO: error if greater than extracted region
+                $size = "pct:$size_pct";
             }
         }
     }

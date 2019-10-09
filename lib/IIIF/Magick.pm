@@ -5,7 +5,7 @@ our $VERSION = "0.01";
 
 use Exporter;
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(info available convert);
+our @EXPORT = qw(info available convert args convert_command);
 
 use IPC::Cmd qw(can_run);
 use List::Util qw(min);
@@ -92,17 +92,11 @@ sub args {
         push @args, qw(-monochrome -colors 2);
     }
 
-    if (@args) {
-        say STDERR "\n", join ' ', map { shell_quote($_) } @args;
-    }
+    # if (@args) {
+    #    say STDERR "\n", join ' ', map { shell_quote($_) } @args;
+    # }
 
     return @args, $file;
-}
-
-sub convert {
-    my ( $req, $in, $out ) = @_;
-    run( 'convert', args( $req, $in ), $out );
-    return !$?;
 }
 
 # adopted from <https://metacpan.org/release/ShellQuote-Any-Tiny>
@@ -118,12 +112,24 @@ sub shell_quote {
         return qq("$arg");
     }
     else {
-        if ( $arg =~ qr{\A[\w,_+/-]+\z} ) {
+        if ( $arg =~ qr{\A[\w,_+/.-]+\z} ) {
             return $arg;
         }
         $arg =~ s/'/'"'"'/g;
         return "'$arg'";
     }
+}
+
+sub convert {
+    my ( $req, $in, $out ) = @_;
+    run( 'convert', args( $req, $in ), $out );
+    return !$?;
+}
+
+sub convert_command {
+    my ( $req, $in, $out ) = @_;
+    my @args = args( $req, $in );
+    return join ' ', 'convert', @args, $out;
 }
 
 sub run {
@@ -135,11 +141,17 @@ sub run {
 1;
 __END__
 
+=head1 NAME
+
+IIIF::Magick - transform image with IIIF Image API Request using Image Magick
+
 =head1 SYNOPSIS
 
-    use IIIF::Magick qw(info);
+    use IIIF::Magick qw(info convert);
 
     my $info = info($file, profile => "level0", id => "...") ;
+    
+    convert( $request, $file, "target.png" );
 
 =head1 FUNCTIONS
 
@@ -152,5 +164,23 @@ Returns whether ImageMagick is available.
 Returns L<image information|https://iiif.io/api/image/3.0/#5-image-information>
 object with fields C<@context>, C<type>, C<protocol>, C<width>, and C<height>.
 Fields C<id> and C<profile> must be added for full IIIF compliance.
+
+=head2 convert( $request, $file, $output )
+
+Convert an image file as specified with a L<IIIF::Request> into an output file.
+Returns true on success.
+
+=head2 args( $request, $file )
+
+Get the list of command line arguments to C<convert> to transform an image file
+as specified via a L<IIIF::Request>.
+
+=head2 command( $command, @arguments )
+
+Get call to an ImageMagick command (e.g. C<convert>) with shell-quoted arguments.
+
+=head1 SEE ALSO
+
+Command line tool L<i3f> can be used to transform images based on this module.
 
 =cut

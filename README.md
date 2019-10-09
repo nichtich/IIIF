@@ -26,6 +26,10 @@ based on the [ImageMagick](https://www.imagemagick.org/) command line applicatio
 
     provide a [PSGI](https://metacpan.org/pod/PSGI) web service to access images via IIIF Image API
 
+# SCRIPTS
+
+This module provides the command line script [i3f](https://metacpan.org/pod/i3f) to apply IIIF Image API requests without a web service.
+
 # SEE ALSO
 
 - [https://github.com/IIIF/awesome-iiif](https://github.com/IIIF/awesome-iiif)

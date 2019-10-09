@@ -9,16 +9,37 @@ if ( !@ARGV ) {
     exit;
 }
 
-if ( -f $ARGV[0] ) {
-    my $file = shift @ARGV;
-    if (@ARGV) {
-        my $req = IIIF::Request->new( shift @ARGV );
-        exit !convert( $req, $file, @ARGV );
-    } else {
-        my $info = info( $file, profile => 'level0', id => $file );
-        print JSON::PP->new->pretty->canonical->encode($info);
-    }
+if ( -f $ARGV[0] && @ARGV == 1 ) {
+    my ($file) = @ARGV;
+    my $info = info( $file, profile => 'level0', id => $file );
+    print JSON::PP->new->pretty->canonical->encode($info);
 } else {
     my $req = IIIF::Request->new( shift @ARGV );
-    say 'convert ' . join ' ', map { IIIF::Magick::shell_quote($_) } IIIF::Magick::args($req);
+    if (@ARGV > 2) {
+        exit !convert( $req, @ARGV );
+    } else {
+        say IIIF::Magick::convert_command( $req, @ARGV );
+    }
 }
+
+__END__
+
+=head1 NAME
+
+i3f - apply IIIF Image API requests on the command line
+
+=head1 DESCRIPTION
+
+This script uses ImageMagick to transform an image file as specified with an
+IIIF Image API Request. It can also be used to get IIIF Image Information.
+
+=head1 EXAMPLE
+
+    $ i3f 100,120,15,20/\!12
+    convert -crop 15x20+100+120 -flop -rotate 12 -background none
+
+=head1 SEE ALSO
+
+Core parts of implementation in L<IIIF::Magick>.
+
+=back

@@ -44,6 +44,10 @@ provide a L<PSGI> web service to access images via IIIF Image API
 
 =back
 
+=head1 SCRIPTS
+
+This module provides the command line script L<i3f> to apply IIIF Image API requests without a web service.
+
 =head1 SEE ALSO
 
 =over
