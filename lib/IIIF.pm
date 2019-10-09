@@ -14,6 +14,7 @@ IIIF - IIIF Image API implementation
 
 =begin markdown 
 
+[![MetaCPAN Release](https://badge.fury.io/pl/IIIF.svg)](https://metacpan.org/release/IIIF)
 [![Linux Build Status](https://travis-ci.com/nichtich/IIIF.svg?branch=master)](https://travis-ci.com/nichtich/IIIF)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/dko0d7647jvfgu8w?svg=true)](https://ci.appveyor.com/project/nichtich/iiif)
 [![Coverage Status](https://coveralls.io/repos/nichtich/IIIF/badge.svg)](https://coveralls.io/r/nichtich/IIIF)
@@ -40,7 +41,7 @@ get image information and convert images as specified with IIIF Image API reques
 
 =item L<IIIF::ImageAPI>
 
-provide a L<PSGI> web service to access images via IIIF Image API
+provide a L<Plack> web service to access images via IIIF Image API
 
 =back
 
