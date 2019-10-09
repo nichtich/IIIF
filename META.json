@@ -65,7 +65,7 @@
          "web" : "https://github.com/nichtich/IIIF"
       }
    },
-   "version" : "0.01",
+   "version" : "0.02",
    "x_contributors" : [
       "Jakob Voß <jakob.voss@gbv.de>"
    ],

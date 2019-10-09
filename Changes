@@ -1,6 +1,8 @@
 Revision history for Perl extension IIIF
 
 {{$NEXT}}
+
+0.02 2019-10-09T15:24:04Z
     - extend documentation and error handling
     - implement size parameter
 

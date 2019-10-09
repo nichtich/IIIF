@@ -1,7 +1,7 @@
 package IIIF::Magick;
 use 5.014001;
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 use Exporter;
 our @ISA    = qw(Exporter);
