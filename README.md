@@ -39,11 +39,11 @@ This module provides the command line script [i3f](https://metacpan.org/pod/i3f)
 
 # LICENSE
 
-Copyright (C) Jakob Voss.
+Copyright (C) Jakob Voß.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 # AUTHOR
 
-Jakob Voss <voss@gbv.de>
+Jakob Voß <voss@gbv.de>

@@ -63,14 +63,14 @@ This module provides the command line script L<i3f> to apply IIIF Image API requ
 
 =head1 LICENSE
 
-Copyright (C) Jakob Voss.
+Copyright (C) Jakob Voß.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-Jakob Voss E<lt>voss@gbv.deE<gt>
+Jakob Voß E<lt>voss@gbv.deE<gt>
 
 =cut
 

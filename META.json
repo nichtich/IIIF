@@ -1,7 +1,7 @@
 {
    "abstract" : "IIIF Image API implementation",
    "author" : [
-      "Jakob Voss <voss@gbv.de>"
+      "Jakob Voß <voss@gbv.de>"
    ],
    "dynamic_config" : 0,
    "generated_by" : "Minilla/v3.1.7, CPAN::Meta::Converter version 2.150001",
