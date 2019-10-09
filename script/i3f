@@ -5,7 +5,8 @@ use IIIF::Magick qw(info convert);
 use JSON::PP;
 
 if ( !@ARGV ) {
-    say "usage: i3f [file] [{region}/{size}/{rotation}/{quality}.{format} [target]]";
+    say
+"usage: i3f [file] [{region}/{size}/{rotation}/{quality}.{format} [target]]";
     exit;
 }
 
@@ -13,12 +14,16 @@ if ( -f $ARGV[0] && @ARGV == 1 ) {
     my ($file) = @ARGV;
     my $info = info( $file, profile => 'level0', id => $file );
     print JSON::PP->new->pretty->canonical->encode($info);
-} else {
+}
+else {
     my $req = IIIF::Request->new( shift @ARGV );
-    if (@ARGV > 2) {
+    if ( @ARGV > 2 ) {
         exit !convert( $req, @ARGV );
-    } else {
-        say IIIF::Magick::convert_command( $req, @ARGV );
+    }
+    else {
+        say join ' ', 'convert',
+          map { IIIF::Magick::shell_quote($_) }
+          IIIF::Magick::args( $req, @ARGV );
     }
 }
 
@@ -37,6 +42,8 @@ IIIF Image API Request. It can also be used to get IIIF Image Information.
 
     $ i3f 100,120,15,20/\!12
     convert -crop 15x20+100+120 -flop -rotate 12 -background none
+
+    $ i3f 64,64 image.png target.png
 
 =head1 SEE ALSO
 

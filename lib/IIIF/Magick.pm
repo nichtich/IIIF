@@ -5,7 +5,7 @@ our $VERSION = "0.02";
 
 use Exporter;
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(info available convert args convert_command);
+our @EXPORT = qw(info available convert args);
 
 use IPC::Cmd qw(can_run);
 use List::Util qw(min);
@@ -86,8 +86,11 @@ sub args {
 
     # apply rotation
     push @args, '-flop' if $req->{mirror};
-    if ( $req->{degree} ) {
-        push @args, '-rotate', $req->{degree}, '-background', 'none';
+    if ( my $degree = $req->{degree} ) {
+        push @args, '-rotate', $degree;
+        if ( $degree - 90 * int( $degree / 90 ) ) {
+            push @args, '-background', 'none';
+        }
     }
 
     # apply quality
@@ -98,11 +101,9 @@ sub args {
         push @args, qw(-monochrome -colors 2);
     }
 
-    # if (@args) {
-    #    say STDERR "\n", join ' ', map { shell_quote($_) } @args;
-    # }
+    push @args, $file if defined $file;
 
-    return @args, $file;
+    return @args;
 }
 
 # adopted from <https://metacpan.org/release/ShellQuote-Any-Tiny>
@@ -130,12 +131,6 @@ sub convert {
     my ( $req, $in, $out ) = @_;
     run( 'convert', args( $req, $in ), $out );
     return !$?;
-}
-
-sub convert_command {
-    my ( $req, $in, $out ) = @_;
-    my @args = args( $req, $in );
-    return join ' ', 'convert', @args, $out;
 }
 
 sub run {
@@ -172,7 +167,7 @@ for applications that make use of it.
 
 Returns whether ImageMagick is available.
 
-=head2 info( $file, id => $id, profile => $profile )
+=head2 info( $file [, id => $id ] [, profile => $profile ] )
 
 Returns L<image information|https://iiif.io/api/image/3.0/#5-image-information>
 object with fields C<@context>, C<type>, C<protocol>, C<width>, and C<height>.
@@ -187,9 +182,5 @@ Returns true on success.
 
 Get the list of command line arguments to C<convert> to transform an image file
 as specified via a L<IIIF::Request>.
-
-=head2 command( $command, @arguments )
-
-Get call to an ImageMagick command (e.g. C<convert>) with shell-quoted arguments.
 
 =cut
