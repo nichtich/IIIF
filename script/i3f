@@ -42,4 +42,4 @@ IIIF Image API Request. It can also be used to get IIIF Image Information.
 
 Core parts of implementation in L<IIIF::Magick>.
 
-=back
+=cut

@@ -66,10 +66,15 @@ sub args {
     elsif ( $req->{size_px} ) {
         my ( $x, $y ) = @{ $req->{size_px} };
 
-        # TODO: respect upscale and limit
+        # TODO: respect upscale
 
         if ( $x && $y ) {
-            push @args, '-resize', "${x}x$y!";
+            if ( $req->{ratio} ) {
+                push @args, '-resize', "${x}x$y";
+            }
+            else {
+                push @args, '-resize', "${x}x$y!";
+            }
         }
         elsif ( $x && !$y ) {
             push @args, '-resize', "${x}";

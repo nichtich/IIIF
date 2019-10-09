@@ -24,7 +24,7 @@ sub new {
 
     my ( $rotation, $mirror, $degree, $quality, $format );
     my ( $region, $region_pct, $region_px );
-    my ( $size, $upscale, $size_px, $size_pct, $limit );
+    my ( $size, $upscale, $size_px, $size_pct, $ratio );
 
     my @parts = split '/', $path;
 
@@ -41,7 +41,7 @@ sub new {
     if ( @parts && $parts[0] =~ /^$SIZE$/ ) {
         $size    = shift @parts;
         $upscale = $1;
-        $limit   = $7;
+        $ratio   = $7;
         $size_px = [ split ',', $5 // $6 // $8 ] if $5 // $6 // $8;
 
         if ( defined $3 ) {
@@ -83,7 +83,7 @@ sub new {
         upscale    => $upscale,
         size_pct   => $size_pct,
         size_px    => $size_px,
-        limit      => $limit,
+        ratio      => $ratio,
         rotation   => $rotation // '0',
         mirror     => $mirror,
         degree     => $degree,
@@ -164,7 +164,7 @@ request:
 
 =item size_px
 
-=item limit
+=item ratio
 
 =item mirror
 
