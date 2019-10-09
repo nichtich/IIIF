@@ -154,6 +154,13 @@ IIIF::Magick - transform image with IIIF Image API Request using Image Magick
     
     convert( $request, $file, "target.png" );
 
+=head1 DESCRIPTION
+
+This module maps L<IIIF ImageAPI|https://iiif.io/api/image/3.0/> request
+parameters to L<ImageMagick|https://www.imagemagick.org/> command line
+arguments. See L<i3f> (command line) and L<IIIF::ImageAPI> (web service)
+for applications that make use of it.
+
 =head1 FUNCTIONS
 
 =head2 available
@@ -179,9 +186,5 @@ as specified via a L<IIIF::Request>.
 =head2 command( $command, @arguments )
 
 Get call to an ImageMagick command (e.g. C<convert>) with shell-quoted arguments.
-
-=head1 SEE ALSO
-
-Command line tool L<i3f> can be used to transform images based on this module.
 
 =cut

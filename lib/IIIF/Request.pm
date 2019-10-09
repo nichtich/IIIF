@@ -4,6 +4,7 @@ use 5.014001;
 our $VERSION = "0.01";
 
 use Plack::Util::Accessor qw(region size rotation quality format);
+use Carp qw(croak);
 
 our $XY = qr{[0-9]+};         # non-negative integer
 our $WH = qr{[1-9][0-9]*};    # positive integer
@@ -49,7 +50,7 @@ sub new {
                 $size = "^pct:$size_pct";
             }
             else {
-                die "invalid percentage in IIIF API request: $path"
+                error("disallowed percentage value")
                   if $size_pct == 0.0 || $size_pct > 100.0;
                 $size = "pct:$size_pct";
             }
@@ -71,7 +72,8 @@ sub new {
         shift @parts;
     }
 
-    die "invalid IIIF API request: $path" if @parts;
+    error( "failed to parse '" . join( '/', '', @parts ) . "'" )
+      if @parts;
 
     bless {
         region => $region // 'full',
@@ -88,6 +90,28 @@ sub new {
         quality    => $quality // 'default',
         format     => $format
     }, $class;
+}
+
+sub error {
+    croak "Invalid IIIF Image API Request: $_[0]";
+}
+
+sub fits {
+    my ( $self, $info ) = @_;
+
+    # region outside the bounds of image dimensions?
+    if ( $self->{region_px} ) {
+        my ( $x, $y, $w, $h ) = @{ $self->{region_px} };
+        return ( $x < $info->{width} && $y < $info->{height} );
+    }
+
+    # size larger than region (unless upscale)
+    if ( !$self->{upscale} ) {
+
+        # TODO
+    }
+
+    return 1;
 }
 
 sub is_default {
@@ -118,13 +142,15 @@ IIIF::Request - IIIF Image API request object
 
 =head1 DESCRIPTION
 
-Stores the part of an IIIF Image API URL after C<{identifier}>:
+Stores parts of an L<IIIF ImageAPI|https://iiif.io/api/image/3.0/> after
+C<{identifier}>:
 
     {region}/{size}/{rotation}/{quality}.{format}
 
 In contrast to the IIIF Image API Specification, all parts are optional.
-Omitted parts are set to their default value except for C<format> which may be
-undefined. In addition, the following fields may be set:
+Omitted parts are set to their default value, except for C<format> which may be
+undefined. In addition, the following fields are set if deriveable form the
+request:
 
 =over
 
@@ -146,19 +172,33 @@ undefined. In addition, the following fields may be set:
 
 =back
 
+Request parsing of percentage and degree values is also more forgiving than the
+specification.
+
 =head1 METHODS
 
 =head2 new( [ $request ] )
 
 Parses a request string. It's ok to only include selected image manipulations.
+Will raise an error on invalid requests. The request is parsed independent from
+a specific image so regions and sizes outside of the image bound are not
+detected as invalid.
+
+=head2 fits( $width, $height )
+
+Check whether the request would be valid for an image of given width and height.
 
 =head2 as_string
 
-Returns the full request string.
+Returns the full request string. Percentage values and degrees are normalized.
 
 =head2 is_default
 
 Returns whether the request (without format) is the default request
 C<full/max/0/default> to get an unmodified image.
+
+=head2 error
+
+Raise an "Invalid IIIF Image API Request" error. Can also be used as function.
 
 =cut

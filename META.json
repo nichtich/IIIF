@@ -66,5 +66,8 @@
       }
    },
    "version" : "0.01",
+   "x_contributors" : [
+      "Jakob Voß <jakob.voss@gbv.de>"
+   ],
    "x_static_install" : 1
 }
