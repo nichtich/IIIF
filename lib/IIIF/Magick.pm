@@ -65,6 +65,9 @@ sub args {
     }
     elsif ( $req->{size_px} ) {
         my ( $x, $y ) = @{ $req->{size_px} };
+
+        # TODO: respect upscale and limit
+
         if ( $x && $y ) {
             push @args, '-resize', "${x}x$y!";
         }
@@ -72,10 +75,8 @@ sub args {
             push @args, '-resize', "${x}";
         }
         elsif ( !$x && $y ) {
-            push @args, '-resize', "x${x}";
+            push @args, '-resize', "x${y}";
         }
-
-        # TODO: upscale, limit, ...
     }
 
     # apply rotation

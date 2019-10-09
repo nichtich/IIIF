@@ -40,8 +40,8 @@ sub new {
     if ( @parts && $parts[0] =~ /^$SIZE$/ ) {
         $size    = shift @parts;
         $upscale = $1;
-        $limit   = $6;
-        $size_px = $4 // $5 // $7;
+        $limit   = $7;
+        $size_px = [ split ',', $5 // $6 // $8 ] if $5 // $6 // $8;
 
         if ( defined $3 ) {
             $size_pct = 1 * $3;
