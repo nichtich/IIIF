@@ -33,7 +33,7 @@ my @tests = (
 
 while (@tests) {
     my ($req, $expect) = splice @tests, 0, 2;
-    is(IIIF::Request->new($req)->as_string, $expect, "$req => $expect");
+    is(IIIF::Request->new($req), $expect, "$req => $expect");
 }
 
 my @invalid = qw(

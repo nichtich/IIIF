@@ -59,6 +59,25 @@ sub args {
         @args = ( '-crop', "${w}x$h%+$x+$y" );
     }
 
+    # apply size
+    if ( $req->{size_pct} ) {
+        push @args, '-resize', $req->{size_pct} . '%';
+    }
+    elsif ( $req->{size_px} ) {
+        my ( $x, $y ) = @{ $req->{size_px} };
+        if ( $x && $y ) {
+            push @args, '-resize', "${x}x$y!";
+        }
+        elsif ( $x && !$y ) {
+            push @args, '-resize', "${x}";
+        }
+        elsif ( !$x && $y ) {
+            push @args, '-resize', "x${x}";
+        }
+
+        # TODO: upscale, limit, ...
+    }
+
     # apply rotation
     push @args, '-flop' if $req->{mirror};
     if ( $req->{degree} ) {

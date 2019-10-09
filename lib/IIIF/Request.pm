@@ -15,7 +15,7 @@ our $ROTATION = qr{([!])?($FLOAT)};
 our $QUALITY  = qr{color|gray|bitonal|default};
 our $FORMAT   = qr{[^.]+};
 
-use overload '""' => \&as_string;
+use overload '""' => \&as_string, fallback => 1;
 
 sub new {
     my $class = shift;
@@ -64,8 +64,8 @@ sub new {
         shift @parts;
         $mirror = !!$1;
 
-        # normalize to 0...<360 with up to 3 decimal points
-        $degree = 1 * sprintf( "%.3f", $2 - int( $2 / 360 ) * 360 );
+        # normalize to 0...<360 with up to 6 decimal points
+        $degree = 1 * sprintf( "%.6f", $2 - int( $2 / 360 ) * 360 );
         $rotation = $mirror ? "!$degree" : "$degree";
     }
 
