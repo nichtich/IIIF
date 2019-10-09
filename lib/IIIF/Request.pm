@@ -5,21 +5,25 @@ our $VERSION = "0.01";
 
 use Plack::Util::Accessor qw(region size rotation quality format);
 
-our $INT    = qr{[0-9]+};                   # also allows 0
-our $PCT    = qr{[0-9]+|[0-9]*\.[0-9]+};    # also allows 0 and >100
-our $DEGREE = $PCT;
-our $REGION   = qr{full|square|($INT,$INT,$INT,$INT)|pct:($PCT,$PCT,$PCT,$PCT)};
-our $SIZE     = qr{(\^)?(max|$INT,|,$INT|pct:$PCT|[!]?$INT,$INT)};
-our $ROTATION = qr{([!])?($DEGREE)};
+our $XY = qr{[0-9]+};         # non-negative integer
+our $WH = qr{[1-9][0-9]*};    # positive integer
+our $PC = qr{[1-9][0-9]?(\.[0-9]+)?|0?\.[0-9]*[1-9][0-9]*|100(\.0+)?}; # >0..100
+our $REGION = qr{full|square|($XY,$XY,$WH,$WH)|pct:($PC,$PC,$PC,$PC)};
+our $FLOAT = qr{[0-9]*(\.[0-9]+)?};    # non-negative
+our $SIZE     = qr{(\^)?(max|pct:($FLOAT)|($WH,)|(,$WH)|(!)?($WH,$WH))};
+our $ROTATION = qr{([!])?($FLOAT)};
 our $QUALITY  = qr{color|gray|bitonal|default};
 our $FORMAT   = qr{[^.]+};
 
-use overload '""' => \&as_string, fallback => 1;
+use overload '""' => \&as_string;
 
 sub new {
-    my ( $class, $path ) = @_;
-    my ( $region,     $size,      $rotation, $quality, $format );
-    my ( $region_pct, $region_px, $upscale,  $mirror,  $degree );
+    my $class = shift;
+    my $path = shift // "";
+
+    my ( $rotation, $mirror, $degree, $quality, $format );
+    my ( $region, $region_pct, $region_px );
+    my ( $size, $upscale, $size_px, $size_pct, $limit );
 
     my @parts = split '/', $path;
 
@@ -36,11 +40,33 @@ sub new {
     if ( @parts && $parts[0] =~ /^$SIZE$/ ) {
         $size    = shift @parts;
         $upscale = $1;
+        $limit   = $6;
+        $size_px = $4 // $5 // $7;
+
+        if ( defined $3 ) {
+            $size_pct = 1 * $3;
+            $size = $upscale ? "^pct:$size_pct" : "pct:$size_pct";
+        }
+
+        if ( !$upscale ) {
+            if ( defined $size_pct ) {
+                die "invalid percentage in IIIF API request: $path"
+                  if $size_pct == 0.0 || $size_pct > 100.0;
+            }
+            elsif ( defined $size_px ) {
+
+                # TODO: error if greater than extracted region
+            }
+        }
     }
 
     if ( @parts && $parts[0] =~ /^$ROTATION$/ ) {
-        $rotation = shift @parts;
-        ( $mirror, $degree ) = ( !!$1, $2 );
+        shift @parts;
+        $mirror = !!$1;
+
+        # normalize to 0...<360 with up to 3 decimal points
+        $degree = 1 * sprintf( "%.3f", $2 - int( $2 / 360 ) * 360 );
+        $rotation = $mirror ? "!$degree" : "$degree";
     }
 
     if ( @parts && $parts[0] =~ /^(($QUALITY)([.]($FORMAT))?|[.]($FORMAT))$/ ) {
@@ -57,12 +83,21 @@ sub new {
         region_px  => $region_px,
         size       => $size // 'max',
         upscale    => $upscale,
+        size_pct   => $size_pct,
+        size_px    => $size_px,
+        limit      => $limit,
         rotation   => $rotation // '0',
         mirror     => $mirror,
         degree     => $degree,
         quality    => $quality // 'default',
         format     => $format
     }, $class;
+}
+
+sub is_default {
+    my ($self) = @_;
+
+    return $self->as_string =~ qr{^full/max/0/default\.};
 }
 
 sub as_string {
@@ -103,6 +138,12 @@ undefined. In addition, the following fields may be set:
 
 =item upscale
 
+=item size_pct
+
+=item size_px
+
+=item limit
+
 =item mirror
 
 =item degree
@@ -118,5 +159,10 @@ Parses a request string. It's ok to only include selected image manipulations.
 =head2 as_string
 
 Returns the full request string.
+
+=head2 is_default
+
+Returns whether the request (without format) is the default request
+C<full/max/0/default> to get an unmodified image.
 
 =cut
