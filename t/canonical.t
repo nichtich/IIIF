@@ -18,7 +18,9 @@ my @tests = (
     '150,'    => '150,100',
     ',100'    => '150,100',
     '^3000,'  => '^3000,2000',
-
+    '!225,100' => '150,100',
+    '!225,200' => '225,150',
+    '^!360,360' => '^360,240',
 
     # both
 );
@@ -36,6 +38,7 @@ check_invalid( '100,100,1,1', 100, 100 ); # out of bounds
 # size
 check_invalid( 'pct:1', 2, 200 ); # too small
 check_invalid( 'pct:1', 200, 2 ); # too small
+check_invalid( '!225,300', 300, 200 ); # upscale needed
 
 # size and region
 check_invalid( '0,0,10,10/pct:1', 200, 200 ); # too small

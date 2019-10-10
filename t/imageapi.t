@@ -28,6 +28,17 @@ test_psgi $app, sub {
     $res = $cb->(GET "/$identifier/pct:.1");
     is $res->code, 303, "abbreviated, lax image request";
     is $res->header('Location'), "http://localhost/$identifier/full/pct:0.1/0/default.png";
+
+    $res = $cb->(GET "/$identifier/full/max/0/default.png");
+    is $res->code, 200, "image request";    
+};
+
+$app = IIIF::ImageAPI->new(root => 't/img', canonical => 1);
+test_psgi $app, sub {
+    my ($cb, $res) = @_;
+    $res = $cb->(GET "/example/pct:50");
+    is $res->code, 303, "redirect to canonical request";
+    is $res->header('Location'), "http://localhost/example/full/150,100/0/default.jpg";
 };
 
 done_testing;

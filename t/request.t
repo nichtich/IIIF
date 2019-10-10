@@ -11,8 +11,10 @@ my @tests = (
     'pct:41.6,7.5,40,70' => 'pct:41.6,7.5,40,70/max/0/default',
 
     # size
-    max        => 'full/max/0/default',
+    max         => 'full/max/0/default',
+    '^max'      => 'full/^max/0/default',
     'pct:01.20' => 'full/pct:1.2/0/default',
+    '^pct:120'  => 'full/^pct:120/0/default',
 
     # rotation
     '!00.00' => 'full/max/!0/default',

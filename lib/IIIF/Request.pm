@@ -150,22 +150,21 @@ sub canonical {
 
             if ( $w && $h ) {
                 if ( $self->{ratio} ) {
+                    if ( $w / $h > $width / $height ) {
+                        $w = pct2px( 100 * $width / $height, $h );
+                    }
+                    else {
+                        $h = pct2px( 100 * $height / $width, $w );
+                    }
+                }
 
-                    # FIXME: support flag to keep aspect ratio
-                    $size = "$w,$h";
-                }
-                else {
-                    $size = "$w,$h";
-                }
+                $size = "$w,$h";
             }
             elsif ($w) {
                 $size = "$w," . pct2px( 100 * $height / $width, $w );
             }
             elsif ($h) {
                 $size = pct2px( 100 * $width / $height, $h ) . ",$h";
-            }
-            else {
-                return;
             }
 
             $size = "^$size" if $upscale;

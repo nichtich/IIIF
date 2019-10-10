@@ -18,9 +18,9 @@ use Plack::MIME;
 use Cwd;
 use Plack::Util;
 
-use Plack::Util::Accessor qw(root cache formats);
+use Plack::Util::Accessor qw(root cache formats canonical);
 
-our @FORMATS = qw(jpg png tif gif pdf jp2 webp);
+our @FORMATS = qw(jpg png gif);
 
 # TODO: pdf webp don't work with Image magick 6 out of the box, jp2 is handled as JPEG
 
@@ -61,6 +61,13 @@ sub response {
 
     $request->{format} = $request->{format} // $file->{format};
 
+    if ( $self->canonical ) {
+        my $info = info( $file->{path} );
+        my $canonical = $request->canonical( $info->{width}, $info->{height} )
+          or return error_response();
+        $request = IIIF::Request->new($canonical);
+    }
+
     if ( "$request" ne $local ) {
         return redirect( $file->{id} . "/$request" );
     }
@@ -84,9 +91,7 @@ sub response {
         # TODO: only get image dimensions once and only if actually needed
         my $info = info( $file->{path} );
         if ( !$request->canonical( $info->{width}, $info->{height} ) ) {
-            return error_response( 400,
-                "Invalid IIIF Image API Request: region or size out of bounds"
-            );
+            return error_response();
         }
 
         if ( convert( $request, $file->{path}, $cache_file ) ) {
@@ -102,7 +107,7 @@ sub file {
 
     my $root = $self->root // '.';
 
-    for my $format ( @{ $self->formats // \@FORMATS } ) {
+    for my $format ( @{ $self->formats // [qw{jpg png gif}] } ) {
         my $path = File::Spec->catfile( $root, "$identifier.$format" );
         if ( -r $path ) {
             return {
@@ -154,8 +159,9 @@ sub json_response {
 }
 
 sub error_response {
-    my ( $code, $message ) = @_;
-
+    my $code = shift // 400;
+    my $message = shift
+      // "Invalid IIIF Image API Request: region or size out of bounds";
     json_response( $code, { message => $message } );
 }
 
@@ -174,5 +180,26 @@ IIIF::ImageAPI - IIIF Image API implementation as Plack application
         enable 'CrossOrigin', origins => '*';
         IIIF::ImageAPI->new(root => 'path/to/images');
     }
+
+=head1 CONFIGURATION
+
+=over
+
+=item root
+
+Image directory
+
+=item cache
+
+Cache directory. Set to a temporary per-process directory by default.
+
+=item canonical
+
+Redirect requests to the L<canonical URI syntax|https://iiif.io/api/image/3.0/#47-canonical-uri-syntax>
+and include (disabled by default).
+
+=item formats
+
+List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. 
 
 =cut
