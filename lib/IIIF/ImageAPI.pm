@@ -170,7 +170,7 @@ sub error_response {
 
 1;
 
-=head1 DESCRIPTION
+=head1 NAME
 
 IIIF::ImageAPI - IIIF Image API implementation as Plack application
 
