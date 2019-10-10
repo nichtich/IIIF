@@ -215,4 +215,6 @@ and include (disabled by default).
 
 List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. 
 
+=back
+
 =cut

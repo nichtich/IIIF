@@ -33,8 +33,7 @@ my @tests = (
     '' => 'full/max/0/default',
 );
 
-while (@tests) {
-    my ($req, $expect) = splice @tests, 0, 2;
+while ( my ($req, $expect) = splice @tests, 0, 2 ) {
     is(IIIF::Request->new($req), $expect, "$req => $expect");
 }
 
