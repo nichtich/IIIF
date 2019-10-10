@@ -129,6 +129,7 @@ sub shell_quote {
 
 sub convert {
     my ( $req, $in, $out, @args ) = @_;
+
     run( 'convert', @args, args( $req, $in ), $out );
     return !$?;
 }

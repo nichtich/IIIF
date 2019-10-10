@@ -36,6 +36,12 @@ test_psgi $app, sub {
 
     $res = $cb->(GET "/$identifier/pct:200");
     is $res->code, 400, "invalid image request";    
+
+    $res = $cb->(GET "/$identifier/0,0,10,10/max/0/default.png");
+    is $res->code, 200, "valid image request";    
+
+    $res = $cb->(GET "/$identifier/0,0,10,10/max/0/default.png");
+    is $res->code, 200, "valid image request (from cache)";    
 };
 
 $app = IIIF::ImageAPI->new(root => 't/img', canonical => 1, base => "https://example.org/iiif/");

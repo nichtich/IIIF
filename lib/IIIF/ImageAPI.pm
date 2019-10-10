@@ -93,7 +93,7 @@ sub response {
             return error_response();
         }
 
-        my @args = $request, $file->{path}, $cache_file;
+        my @args = ( $request, $file->{path}, $cache_file );
         push @args, @{ $self->{magick_args} || [] };
         return image_response($cache_file) if convert(@args);
     }

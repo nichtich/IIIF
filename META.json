@@ -42,7 +42,9 @@
       },
       "runtime" : {
          "requires" : {
+            "HTTP::Date" : "0",
             "Plack" : "1.0",
+            "Try::Tiny" : "0",
             "perl" : "5.014001"
          }
       },
@@ -67,7 +69,8 @@
    },
    "version" : "0.03",
    "x_contributors" : [
-      "Jakob Voß <jakob.voss@gbv.de>"
+      "Jakob Voß <jakob.voss@gbv.de>",
+      "Mohammad S Anwar <Mohammad.Anwar@yahoo.com>"
    ],
    "x_static_install" : 1
 }
