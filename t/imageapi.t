@@ -4,10 +4,12 @@ use Plack::Test;
 use HTTP::Request::Common;
 use IIIF::Magick;
 use IIIF::ImageAPI;
+use File::Temp qw(tempdir);
 
 plan skip_all => "ImageMagick missing" unless IIIF::Magick::available();
 
-my $app = IIIF::ImageAPI->new(root => 't/img');
+my $cache = tempdir( CLEANUP => 1 );
+my $app = IIIF::ImageAPI->new(root => 't/img', cache => $cache);
 my $identifier = "67352ccc-d1b0-11e1-89ae-279075081939";
 
 test_psgi $app, sub {
@@ -31,14 +33,18 @@ test_psgi $app, sub {
 
     $res = $cb->(GET "/$identifier/full/max/0/default.png");
     is $res->code, 200, "image request";    
+
+    $res = $cb->(GET "/$identifier/pct:200");
+    is $res->code, 400, "invalid image request";    
 };
 
-$app = IIIF::ImageAPI->new(root => 't/img', canonical => 1);
+$app = IIIF::ImageAPI->new(root => 't/img', canonical => 1, base => "https://example.org/iiif/");
 test_psgi $app, sub {
     my ($cb, $res) = @_;
+
     $res = $cb->(GET "/example/pct:50");
     is $res->code, 303, "redirect to canonical request";
-    is $res->header('Location'), "http://localhost/example/full/150,100/0/default.jpg";
+    is $res->header('Location'), "https://example.org/iiif/example/full/150,100/0/default.jpg";
 };
 
 done_testing;

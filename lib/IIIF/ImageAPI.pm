@@ -18,7 +18,7 @@ use Plack::MIME;
 use Cwd;
 use Plack::Util;
 
-use Plack::Util::Accessor qw(root cache formats canonical);
+use Plack::Util::Accessor qw(root base cache formats canonical);
 
 our @FORMATS = qw(jpg png gif);
 
@@ -30,7 +30,8 @@ sub call {
 
     if ( $req->path_info =~ qr{^/([^/]+)/?(.*)$} ) {
         my ( $identifier, $request ) = ( $1, $2 );
-        if ( my $file = $self->file( $req->base, $identifier ) ) {
+        if ( my $file = $self->file( $self->base // $req->base, $identifier ) )
+        {
             return $self->response( $file, $request );
         }
     }
@@ -140,7 +141,8 @@ sub image_response {
         [
             'Content-Type'   => $type,
             'Content-Length' => $stat[7],
-            'Last-Modified'  => HTTP::Date::time2str( $stat[9] )
+            'Last-Modified'  => HTTP::Date::time2str( $stat[9] ),
+            'Link' => 'http://iiif.io/api/image/3/level3.json>;rel="profile"'
         ],
         $fh,
     ];
@@ -153,7 +155,10 @@ sub json_response {
 
     [
         $code // 200,
-        [ 'Content-Type' => $type // 'application/json' ],
+        [
+            'Content-Type' => $type // 'application/json',
+            'Link' => 'http://iiif.io/api/image/3/level3.json>;rel="profile"'
+        ],
         [ $JSON->encode($body) ]
     ];
 }
@@ -178,7 +183,10 @@ IIIF::ImageAPI - IIIF Image API implementation as Plack application
 
     builder {
         enable 'CrossOrigin', origins => '*';
-        IIIF::ImageAPI->new(root => 'path/to/images');
+        IIIF::ImageAPI->new(
+            root => 'path/to/images',
+            base => 'https://example.org/iiif/'
+        );
     }
 
 =head1 CONFIGURATION
@@ -192,6 +200,11 @@ Image directory
 =item cache
 
 Cache directory. Set to a temporary per-process directory by default.
+
+=item base
+
+Base URI which the service is hosted at, including trailing slash. Likely
+required if the service is put behind a web proxy.
 
 =item canonical
 
