@@ -1,7 +1,7 @@
 package IIIF;
 use 5.014001;
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 1;
 __END__

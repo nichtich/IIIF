@@ -1,6 +1,8 @@
 Revision history for Perl extension IIIF
 
 {{$NEXT}}
+
+0.03 2019-10-10T12:50:26Z
     - implement canonical requests
     - add base URI parameter
     - improve test coverage

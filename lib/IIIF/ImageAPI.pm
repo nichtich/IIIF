@@ -1,7 +1,7 @@
 package IIIF::ImageAPI;
 use 5.014001;
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 use parent 'Plack::Component';
 
