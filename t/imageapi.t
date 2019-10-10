@@ -9,7 +9,7 @@ use File::Temp qw(tempdir);
 plan skip_all => "ImageMagick missing" unless IIIF::Magick::available();
 
 my $cache = tempdir( CLEANUP => 1 );
-my $app = IIIF::ImageAPI->new(root => 't/img', cache => $cache);
+my $app = IIIF::ImageAPI->new(images => 't/img', cache => $cache);
 my $identifier = "67352ccc-d1b0-11e1-89ae-279075081939";
 
 test_psgi $app, sub {
@@ -44,7 +44,8 @@ test_psgi $app, sub {
     is $res->code, 200, "valid image request (from cache)";    
 };
 
-$app = IIIF::ImageAPI->new(root => 't/img', canonical => 1, base => "https://example.org/iiif/");
+$app = IIIF::ImageAPI->new(
+    images => 't/img', canonical => 1, base => "https://example.org/iiif/");
 test_psgi $app, sub {
     my ($cb, $res) = @_;
 
