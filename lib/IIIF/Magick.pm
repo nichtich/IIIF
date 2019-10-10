@@ -128,8 +128,8 @@ sub shell_quote {
 }
 
 sub convert {
-    my ( $req, $in, $out ) = @_;
-    run( 'convert', args( $req, $in ), $out );
+    my ( $req, $in, $out, @args ) = @_;
+    run( 'convert', @args, args( $req, $in ), $out );
     return !$?;
 }
 
@@ -173,10 +173,11 @@ Returns L<image information|https://iiif.io/api/image/3.0/#5-image-information>
 object with fields C<@context>, C<type>, C<protocol>, C<width>, and C<height>.
 Fields C<id> and C<profile> must be added for full IIIF compliance.
 
-=head2 convert( $request, $file, $output )
+=head2 convert( $request, $file, $output [, @args ] )
 
 Convert an image file as specified with a L<IIIF::Request> into an output file.
-Returns true on success.
+Returns true on success. Additional arguments are prepended to the call of
+ImageMagick's C<convert>.
 
 =head2 args( $request, $file )
 

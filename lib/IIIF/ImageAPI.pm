@@ -18,11 +18,9 @@ use Plack::MIME;
 use Cwd;
 use Plack::Util;
 
-use Plack::Util::Accessor qw(root base cache formats canonical);
+use Plack::Util::Accessor qw(root base cache formats canonical magick_args);
 
 our @FORMATS = qw(jpg png gif);
-
-# TODO: pdf webp don't work with Image magick 6 out of the box, jp2 is handled as JPEG
 
 sub call {
     my ( $self, $env ) = @_;
@@ -95,9 +93,9 @@ sub response {
             return error_response();
         }
 
-        if ( convert( $request, $file->{path}, $cache_file ) ) {
-            convert return image_response($cache_file);
-        }
+        my @args = $request, $file->{path}, $cache_file;
+        push @args, @{ $self->{magick_args} || [] };
+        return image_response($cache_file) if convert(@args);
     }
 
     error_response( 500, "Conversion failed" );
@@ -214,6 +212,10 @@ and include (disabled by default).
 =item formats
 
 List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. 
+
+=item magick_args
+
+Additional command line arguments always used when calling ImageMagick. For instance C<[qw(-limit memory 1GB -limit disk 1GB)]> to limit resources.
 
 =back
 
