@@ -5,14 +5,14 @@ our $VERSION = "0.02";
 
 use Plack::Util::Accessor qw(region size rotation quality format);
 use Carp qw(croak);
+use List::Util qw(min);
 
-our $XY = qr{[0-9]+};         # non-negative integer
-our $WH = qr{[1-9][0-9]*};    # positive integer
-our $PC = qr{[1-9][0-9]?(\.[0-9]+)?|0?\.[0-9]*[1-9][0-9]*|100(\.0+)?}; # >0..100
-our $REGION = qr{full|square|($XY,$XY,$WH,$WH)|pct:($PC,$PC,$PC,$PC)};
-our $FLOAT = qr{[0-9]*(\.[0-9]+)?};    # non-negative
-our $SIZE     = qr{(\^)?(max|pct:($FLOAT)|($WH,)|(,$WH)|(!)?($WH,$WH))};
-our $ROTATION = qr{([!])?($FLOAT)};
+our $XY  = qr{[0-9]+};               # non-negative integer
+our $WH  = qr{[1-9][0-9]*};          # positive integer
+our $NUM = qr{[0-9]*(\.[0-9]+)?};    # non-negative
+our $REGION   = qr{full|square|($XY,$XY,$WH,$WH)|pct:($NUM,$NUM,$NUM,$NUM)};
+our $SIZE     = qr{(\^)?(max|pct:($NUM)|($WH,)|(,$WH)|(!)?($WH,$WH))};
+our $ROTATION = qr{([!])?($NUM)};
 our $QUALITY  = qr{color|gray|bitonal|default};
 our $FORMAT   = qr{[^.]+};
 
@@ -34,7 +34,11 @@ sub new {
             $region_px = [ split ',', $1 ];
         }
         elsif ($2) {
-            $region_pct = [ split ',', $2 ];
+            $region_pct = [ map { 1 * $_ } split ',', $2 ];
+            error("disallowed percentage value")
+              if !$region_pct->[2]
+              || !$region_pct->[3]
+              || grep { $_ > 100 } @$region_pct;
         }
     }
 
@@ -96,22 +100,87 @@ sub error {
     croak "Invalid IIIF Image API Request: $_[0]";
 }
 
-sub fits {
-    my ( $self, $info ) = @_;
+sub canonical {
+    my ( $self, $width, $height ) = @_;
 
-    # region outside the bounds of image dimensions?
-    if ( $self->{region_px} ) {
+    # convert region to /full|x,y,w,h/
+    my $region = $self->{region};
+    if ( $self->{region} eq 'square' ) {
+        my $size = min( $width, $height );
+        $region = "0,0,$size,$size";
+    }
+    elsif ( $self->{region_pct} ) {
+        my ( $x, $y, $w, $h ) = @{ $self->{region_pct} };
+        $x = pct2px( $x, $width );
+        $y = pct2px( $y, $height );
+        $w = pct2px( $w, $width ) or return;
+        $h = pct2px( $h, $height ) or return;
+        $region = "$x,$y,$w,$h";
+    }
+    elsif ( $self->{region_px} ) {    # region outside of image dimensions?
         my ( $x, $y, $w, $h ) = @{ $self->{region_px} };
-        return ( $x < $info->{width} && $y < $info->{height} );
+        return if $x >= $width && $y >= $height;
+    }
+    $region = 'full' if $region eq "0,0,$width,$height";
+
+    # proceed with region size
+    if ( $region ne 'full' ) {
+        ( undef, undef, $width, $height ) = split ',', $region;
     }
 
-    # size larger than region (unless upscale)
-    if ( !$self->{upscale} ) {
-
-        # TODO
+    if ( $self->{size_pct} ) {        # too small
+        return
+          if !pct2px( $self->{size_pct}, $width )
+          || !pct2px( $self->{size_pct}, $height );
     }
 
-    return 1;
+    # convert size to /[^]?(max|w,h)/
+    my $size    = $self->{size};
+    my $upscale = $self->{upscale};
+    if ( $size !~ /\^?max/ ) {    # TODO: respect maxWidth, maxHeight, maxArea
+        if ( $self->{size_pct} ) {
+            $size = join ',',
+              map { pct2px( $self->{size_pct}, $_ ) } ( $width, $height );
+            $size = "^$size" if $upscale;
+        }
+        else {
+            my ( $w, $h ) = @{ $self->{size_px} };
+            return if !$w && !$h;
+            return if !$upscale && ( $h > $height || $w > $width );
+
+            if ( $w && $h ) {
+                if ( $self->{ratio} ) {
+
+                    # FIXME: support flag to keep aspect ratio
+                    $size = "$w,$h";
+                }
+                else {
+                    $size = "$w,$h";
+                }
+            }
+            elsif ($w) {
+                $size = "$w," . pct2px( 100 * $height / $width, $w );
+            }
+            elsif ($h) {
+                $size = pct2px( 100 * $width / $height, $h ) . ",$h";
+            }
+            else {
+                return;
+            }
+
+            $size = "^$size" if $upscale;
+        }
+
+        $size = "max" if $size =~ /^\^?$width,$height$/;
+    }
+
+    my $str = join '/', $region, $size, $self->{rotation}, $self->{quality};
+    return defined $self->{format} ? "$str.$self->{format}" : $str;
+}
+
+sub pct2px {
+    my ( $percent, $value ) = @_;
+    return int( $percent * $value / 100 + 0.5 );
 }
 
 sub is_default {
@@ -148,9 +217,11 @@ C<{identifier}>:
     {region}/{size}/{rotation}/{quality}.{format}
 
 In contrast to the IIIF Image API Specification, all parts are optional.
-Omitted parts are set to their default value, except for C<format> which may be
-undefined. In addition, the following fields are set if deriveable form the
-request:
+Omitted parts are set to their default value, except for C<format> which is
+allowed to be undefined.  Parsing of percentage and degree values is more
+forgiving than required by the specification as values are normalized (e.g.
+removal of redundant digits).  The following additional fields are set if
+deriveable form the request:
 
 =over
 
@@ -172,9 +243,6 @@ request:
 
 =back
 
-Request parsing of percentage and degree values is also more forgiving than the
-specification.
-
 =head1 METHODS
 
 =head2 new( [ $request ] )
@@ -184,10 +252,6 @@ Will raise an error on invalid requests. The request is parsed independent from
 a specific image so regions and sizes outside of the image bound are not
 detected as invalid.
 
-=head2 fits( $width, $height )
-
-Check whether the request would be valid for an image of given width and height.
-
 =head2 as_string
 
 Returns the full request string. Percentage values and degrees are normalized.
@@ -196,6 +260,13 @@ Returns the full request string. Percentage values and degrees are normalized.
 
 Returns whether the request (without format) is the default request
 C<full/max/0/default> to get an unmodified image.
+
+=head2 canonical( $width, $height )
+
+Returns the L<canonical request|https://iiif.io/api/image/3.0/#47-canonical-uri-syntax>
+for an image of given width and height or C<undef> if this would result in an
+invalid request (because region or size would be out of bounds). In contrast to
+the specification, the C<format> is not required part of the canonical request.
 
 =head2 error
 

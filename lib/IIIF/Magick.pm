@@ -53,8 +53,8 @@ sub args {
         my ( $x, $y, $w, $h ) = @$region_pct;
 
         my $info = info($file);
-        $x = int( 0.01 * $x * $info->{width} );
-        $y = int( 0.01 * $y * $info->{height} );
+        $x = int( $x * $info->{width} / 100 + 0.5 );
+        $y = int( $y * $info->{height} / 100 + 0.5 );
 
         @args = ( '-crop', "${w}x$h%+$x+$y" );
     }

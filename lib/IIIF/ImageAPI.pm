@@ -83,7 +83,7 @@ sub response {
 
         # TODO: only get image dimensions once and only if actually needed
         my $info = info( $file->{path} );
-        if ( !$request->fits($info) ) {
+        if ( !$request->canonical( $info->{width}, $info->{height} ) ) {
             return error_response( 400,
                 "Invalid IIIF Image API Request: region or size out of bounds"
             );
