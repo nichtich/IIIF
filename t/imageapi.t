@@ -34,8 +34,11 @@ test_psgi $app, sub {
     $res = $cb->(GET "/$identifier/full/max/0/default.png");
     is $res->code, 200, "image request";    
 
+    $res = $cb->(GET "/$identifier/pct:200");
+    is $res->code, 400, "invalid image request (malformed)";
+
     $res = $cb->(GET "/$identifier/full/pct:0.01/0/default.png");
-    is $res->code, 400, "invalid image request";
+    is $res->code, 400, "invalid image request (image size)";
 
     $res = $cb->(GET "/$identifier/0,0,10,10/max/0/default.png");
     is $res->code, 200, "valid image request";    

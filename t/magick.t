@@ -11,6 +11,8 @@ my @tests = (
         -filter point -distort SRT 0 +repage)],
     '0,1,2,3' => [qw(-crop 2x3+0+1)],
     'pct:41.6,7.5,66.6,100' => [qw(-set page -%[fx:w*0.416]-%[fx:h*0.075] -crop 66.6x100%+0+0)],
+    'pct:0,7.5,66.6,100' => [qw(-set page -%[fx:w*0]-%[fx:h*0.075] -crop 66.6x100%+0+0)],
+    'pct:0,0,66.6,100' => [qw(-crop 66.6x100%+0+0)],
 
     # size
     'pct:9.5' => [qw(-resize 9.5%)],

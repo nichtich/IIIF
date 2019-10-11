@@ -152,7 +152,7 @@ sub json_response {
     state $JSON = JSON::PP->new->pretty->canonical(1);
 
     [
-        $code // 200,
+        $code,
         [
             'Content-Type' => $type // 'application/json',
             'Link' => 'http://iiif.io/api/image/3/level3.json>;rel="profile"'
