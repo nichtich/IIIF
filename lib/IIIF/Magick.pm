@@ -39,11 +39,12 @@ sub args {
 
     # apply region
     if ( $req->{region} eq 'square' ) {
-        my $info = info($file);
-        if ( $info->{width} ne $info->{height} ) {
-            my $size = min( $info->{width}, $info->{height} );
-            @args = ( qw(-gravity center -crop), "${size}x${size}+0+0" );
-        }
+
+     # could be simpler in ImageMagick 7:
+     # push @args, qw(-gravity center -crop), "%[fx:w>h?h:w]x%[fx:w>h?h:w]+0+0";
+        push @args, qw(-set option:distort:viewport
+          %[fx:w>h?h:w]x%[fx:w>h?h:w]+%[fx:w>h?(w-h)/2:0]+%[fx:w>h?0:(h-w)/2]
+          -filter point -distort SRT 0 +repage);
     }
     elsif ( my $region_px = $req->{region_px} ) {
         my ( $x, $y, $w, $h ) = @$region_px;
@@ -52,11 +53,14 @@ sub args {
     elsif ( my $region_pct = $req->{region_pct} ) {
         my ( $x, $y, $w, $h ) = @$region_pct;
 
-        my $info = info($file);
-        $x = int( $x * $info->{width} / 100 + 0.5 );
-        $y = int( $y * $info->{height} / 100 + 0.5 );
+        if ( $x || $y ) {
+            my $px = $x / 100;
+            my $py = $y / 100;
+            push @args, '-set', 'page', "-%[fx:w*$px]-%[fx:h*$py]";
+        }
 
-        @args = ( '-crop', "${w}x$h%+$x+$y" );
+        # could also be simpler in ImageMagick 7
+        push @args, '-crop', "${w}x$h%+0+0";
     }
 
     # apply size
@@ -65,8 +69,6 @@ sub args {
     }
     elsif ( $req->{size_px} ) {
         my ( $x, $y ) = @{ $req->{size_px} };
-
-        # TODO: respect upscale
 
         if ( $x && $y ) {
             if ( $req->{ratio} ) {
@@ -180,9 +182,22 @@ Convert an image file as specified with a L<IIIF::Request> into an output file.
 Returns true on success. Additional arguments are prepended to the call of
 ImageMagick's C<convert>.
 
+Requires at least ImageMagick 6.9.
+
 =head2 args( $request, $file )
 
 Get the list of command line arguments to C<convert> to transform an image file
 as specified via a L<IIIF::Request>.
+
+=head2 LIMITATIONS
+
+The upscale option of L<size|https://iiif.io/api/image/3.0/#42-size> parameter
+is ignored: size C<^max> will not upscale the image as the resulting size
+depends on additional variables C<maxWidth>, C<maxHeight>, C<maxArea>. 
+
+The IIIF Image API Request is not validated before processing. Sizes larger
+than the selected region will therefore always result in an upscaled image.
+Use method C<canonical> of L<IIIF::Request> to filter out such invalid
+requests.
 
 =cut
