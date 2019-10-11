@@ -54,4 +54,11 @@ test_psgi $app, sub {
     is $res->header('Location'), "https://example.org/iiif/example/full/150,100/0/default.jpg";
 };
 
+test_psgi( IIIF::ImageAPI->new( images => 't/img', magick_args => [qw(-xxx)] ), sub {
+    my ($cb, $res) = @_;
+    $res = $cb->(GET "/example/0,0,10,10/max/0/default.png");
+    is $res->code, 500, 'error response on ImageMagick error';
+    is $res->header('Content-Type'), "application/json";
+});
+
 done_testing;

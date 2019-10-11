@@ -3,8 +3,7 @@ use 5.014001;
 
 our $VERSION = "0.04";
 
-use Exporter;
-our @ISA    = qw(Exporter);
+use parent 'Exporter';
 our @EXPORT = qw(info available convert convert_command convert_args);
 
 use IPC::Cmd qw(can_run);
