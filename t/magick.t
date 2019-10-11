@@ -1,7 +1,7 @@
 use strict;
 use Test::More 0.98;
 use IIIF::Request;
-use IIIF::Magick;
+use IIIF::Magick qw(convert_command);
 
 my @tests = (
     # region
@@ -37,7 +37,13 @@ my @tests = (
 
 while ( my ($req, $args) = splice @tests, 0, 2 ) {
     $req = IIIF::Request->new($req);
-    is_deeply([IIIF::Magick::args($req)], $args, "$req");
+    is_deeply([IIIF::Magick::convert_args($req)], $args, "$req");
+}
+
+{
+    local $^O = 'MSWin32';
+    my $cmd = convert_command(IIIF::Request->new("pct:50"));
+    like $cmd, qr{^(magick )?convert -resize "50%"$}, "Windows shell escape";
 }
 
 done_testing;

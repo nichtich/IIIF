@@ -5,7 +5,7 @@ our $VERSION = "0.04";
 
 use Exporter;
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(info available convert args);
+our @EXPORT = qw(info available convert convert_command convert_args);
 
 use IPC::Cmd qw(can_run);
 use List::Util qw(min);
@@ -18,9 +18,10 @@ sub info {
     my $file = shift;
 
     -f $file or die "$file: No such file\n";
-    my $out = run( qw(identify -format %Wx%H), $file );
+    my $cmd = join ' ', map shell_quote($_), qw(identify -format %Wx%H), $file;
 
-    ( $out =~ /^(\d+)x(\d+)$/ ) or die "$file: Failed to get image dimensions";
+    ( `$cmd` =~ /^(\d+)x(\d+)$/ )
+      or die "$file: Failed to get image dimensions";
 
     return {
         '@context' => 'http://iiif.io/api/image/3/context.json',
@@ -32,9 +33,8 @@ sub info {
     };
 }
 
-sub args {
-    my ( $req, $file ) = @_;
-
+sub convert_args {
+    my $req = shift;
     my @args;
 
     # apply region
@@ -103,9 +103,24 @@ sub args {
         push @args, qw(-monochrome -colors 2);
     }
 
-    push @args, $file if defined $file;
-
     return @args;
+}
+
+sub convert_command {
+    my ( $req, $in, $out ) = splice @_, 0, 3;
+
+    push @_, convert_args($req);
+    push @_, $in if defined $in and $in ne '';
+    push @_, $out if defined $out and $out ne '';
+    unshift @_, "magick" if can_run("magick");
+
+    return join ' ', 'convert', map shell_quote($_), @_;
+}
+
+sub convert {
+    my $command = convert_command(@_);
+    qx{$command};
+    return !$?;
 }
 
 # adopted from <https://metacpan.org/release/ShellQuote-Any-Tiny>
@@ -113,33 +128,18 @@ sub shell_quote {
     my $arg = shift;
 
     if ( $^O eq 'MSWin32' ) {
-        if ( $arg =~ /\A\w+\z/ ) {
-            return $arg;
+        if ( $arg !~ /\A[\w_+-]+\z/ ) {
+            $arg =~ s/\\(?=\\*(?:"|$))/\\\\/g;
+            $arg =~ s/"/\\"/g;
+            return qq("$arg");
         }
-        $arg =~ s/\\(?=\\*(?:"|$))/\\\\/g;
-        $arg =~ s/"/\\"/g;
-        return qq("$arg");
     }
-    else {
-        if ( $arg =~ qr{\A[\w,_+/.-]+\z} ) {
-            return $arg;
-        }
+    elsif ( $arg !~ qr{\A[\w,_+/.-]+\z} ) {
         $arg =~ s/'/'"'"'/g;
         return "'$arg'";
     }
-}
 
-sub convert {
-    my ( $req, $in, $out, @args ) = @_;
-
-    run( 'convert', @args, args( $req, $in ), $out );
-    return !$?;
-}
-
-sub run {
-    unshift @_, "magick" if can_run("magick");
-    my $command = join ' ', map &shell_quote, @_;
-    qx{$command};
+    return $arg;
 }
 
 1;
@@ -184,7 +184,11 @@ ImageMagick's C<convert>.
 
 Requires at least ImageMagick 6.9.
 
-=head2 args( $request, $file )
+=head2 convert_command( $request, $file, $output [, @args ] )
+
+Get a shell-quoted command to convert an image with a L<IIIF::Request>.
+
+=head2 convert_args( $request )
 
 Get the list of command line arguments to C<convert> to transform an image file
 as specified via a L<IIIF::Request>.
