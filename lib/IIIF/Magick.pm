@@ -106,12 +106,12 @@ sub convert_args {
 sub convert_command {
     my ( $req, $in, $out ) = splice @_, 0, 3;
 
-    push @_, convert_args($req);
-    push @_, $in if defined $in and $in ne '';
-    push @_, $out if defined $out and $out ne '';
-    unshift @_, "magick" if can_run("magick");
+    my @cmd = ( 'convert', @_, convert_args($req) );
+    push @cmd, $in  if defined $in  and $in ne '';
+    push @cmd, $out if defined $out and $out ne '';
+    unshift @cmd, "magick" if can_run("magick");
 
-    return join ' ', 'convert', map shell_quote($_), @_;
+    return join ' ', map shell_quote($_), @cmd;
 }
 
 sub convert {
