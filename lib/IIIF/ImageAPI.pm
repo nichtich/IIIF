@@ -47,7 +47,7 @@ sub response {
     elsif ( $local eq 'info.json' ) {
         return json_response(
             200,
-            info( $file->{path}, id => $file->{id}, protocol => 'level3' ),
+            info( $file->{path}, id => $file->{id}, profile => 'level2' ),
 'application/ld+json;profile="http://iiif.io/api/image/3/context.json"'
         );
     }
@@ -140,7 +140,7 @@ sub image_response {
             'Content-Type'   => $type,
             'Content-Length' => $stat[7],
             'Last-Modified'  => HTTP::Date::time2str( $stat[9] ),
-            'Link' => 'http://iiif.io/api/image/3/level3.json>;rel="profile"'
+            'Link' => 'http://iiif.io/api/image/3/level2.json>;rel="profile"'
         ],
         $fh,
     ];
@@ -155,7 +155,7 @@ sub json_response {
         $code,
         [
             'Content-Type' => $type // 'application/json',
-            'Link' => 'http://iiif.io/api/image/3/level3.json>;rel="profile"'
+            'Link' => 'http://iiif.io/api/image/3/level2.json>;rel="profile"'
         ],
         [ $JSON->encode($body) ]
     ];

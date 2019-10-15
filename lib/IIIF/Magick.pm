@@ -170,7 +170,7 @@ Returns whether ImageMagick is available.
 =head2 info( $file [, id => $id ] [, profile => $profile ] )
 
 Returns L<image information|https://iiif.io/api/image/3.0/#5-image-information>
-object with fields C<@context>, C<type>, C<protocol>, C<width>, and C<height>.
+object with fields C<@context>, C<type>, C<profile>, C<width>, and C<height>.
 Fields C<id> and C<profile> must be added for full IIIF compliance.
 
 =head2 convert( $request, $file, $output [, @args ] )
