@@ -32,7 +32,7 @@ test_psgi $app, sub {
     is $res->header('Location'), "http://localhost/$identifier/full/pct:0.1/0/default.png";
 
     $res = $cb->(GET "/$identifier/full/max/0/default.png");
-    is $res->code, 200, "image request";    
+    is $res->code, 200, "image request";
 
     $res = $cb->(GET "/$identifier/pct:200");
     is $res->code, 400, "invalid image request (malformed)";
@@ -41,10 +41,13 @@ test_psgi $app, sub {
     is $res->code, 400, "invalid image request (image size)";
 
     $res = $cb->(GET "/$identifier/0,0,10,10/max/0/default.png");
-    is $res->code, 200, "valid image request";    
+    is $res->code, 200, "valid image request";
 
     $res = $cb->(GET "/$identifier/0,0,10,10/max/0/default.png");
-    is $res->code, 200, "valid image request (from cache)";    
+    is $res->code, 200, "valid image request (from cache)";
+
+    $res = $cb->(GET "/$identifier/0,0,10,10/max/0/default.xxx");
+    is $res->code, 400, "unsupported format";
 };
 
 $app = IIIF::ImageAPI->new(

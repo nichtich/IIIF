@@ -22,6 +22,16 @@ use Plack::Util::Accessor qw(images base cache formats canonical magick_args);
 
 our @FORMATS = qw(jpg png gif);
 
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
+
+    $self->images('.') unless $self->images;
+    $self->formats( [qw{jpg png gif}] ) unless $self->formats;
+
+    $self;
+}
+
 sub call {
     my ( $self, $env ) = @_;
     my $req = Plack::Request->new($env);
@@ -59,6 +69,9 @@ sub response {
     }
 
     $request->{format} = $request->{format} // $file->{format};
+
+    return error_response( 400, "unsupported format" )
+      unless grep { $_ eq $request->{format} } @{ $self->formats };
 
     if ( $self->canonical ) {
         my $info = info( $file->{path} );
@@ -104,11 +117,8 @@ sub response {
 sub file {
     my ( $self, $identifier ) = @_;
 
-    my $images = $self->images // '.';
-
-    my $formats = $self->formats // [qw{jpg png gif}];
-    for my $format (@$formats) {
-        my $path = File::Spec->catfile( $images, "$identifier.$format" );
+    for my $format ( @{ $self->formats } ) {
+        my $path = File::Spec->catfile( $self->images, "$identifier.$format" );
         if ( -r $path ) {
             return {
                 path   => $path,
