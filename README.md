@@ -15,10 +15,14 @@ based on the [ImageMagick](https://www.imagemagick.org/) command line applicatio
 
 # FEATURES
 
-- Full IIIF Image API 3.0 level 2 compliance (also tested with [https://iiif.io/api/image/validator/](IIIF Image API Validator))
+- Full IIIF Image API 3.0 level 2 compliance
 - Support abbreviated requests (e.g. `300,200` to select size)
-- Tested with ImageMagick 6 (Ubuntu) and 7 (Windows)
-- 100% [test coverage](https://coveralls.io/github/nichtich/IIIF) on statement level, (>90% on branch level and >70% on condition level)
+- Web service ([IIIF::ImageAPI](https://metacpan.org/pod/IIIF::ImageAPI)) and command line client ([i3f](https://metacpan.org/pod/i3f))
+- Heavily tested
+    - passing the [IIIF Image API Validator](https://iiif.io/api/image/validator/)
+    - using ImageMagick 6 (on Ubuntu) and ImageMagick 7 (on Windows)
+    - 100% [test coverage](https://coveralls.io/github/nichtich/IIIF) on statement
+    level, (>90% on branch level and >70% on condition level).
 
 # MODULES
 

@@ -33,16 +33,36 @@ based on the L<ImageMagick|https://www.imagemagick.org/> command line applicatio
 
 =item
 
-Full IIIF Image API 3.0 level 2 compliance.
+Full IIIF Image API 3.0 level 2 compliance
 
 =item
 
-Tested with ImageMagick 6 (Ubuntu) and 7 (Windows)
+Support abbreviated requests (e.g. C<300,200> to select size)
+
+=item
+
+Web service (L<IIIF::ImageAPI>) and command line client (L<i3f>)
+
+=item
+
+Heavily tested
+
+=over
+
+=item
+
+passing the L<IIIF Image API Validator|https://iiif.io/api/image/validator/>
+
+=item
+
+using ImageMagick 6 (on Ubuntu) and ImageMagick 7 (on Windows)
 
 =item 
 
 100% L<test coverage|https://coveralls.io/github/nichtich/IIIF> on statement
 level, (>90% on branch level and >70% on condition level).
+
+=back
 
 =back
 
