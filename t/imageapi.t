@@ -5,6 +5,7 @@ use HTTP::Request::Common;
 use IIIF::Magick;
 use IIIF::ImageAPI;
 use File::Temp qw(tempdir);
+use JSON::PP;
 
 plan skip_all => "ImageMagick missing" unless IIIF::Magick::available();
 
@@ -51,13 +52,19 @@ test_psgi $app, sub {
 };
 
 $app = IIIF::ImageAPI->new(
-    images => 't/img', canonical => 1, base => "https://example.org/iiif/");
+    images => 't/img', canonical => 1, base => "https://example.org/iiif/",
+    rights => 'http://rightsstatements.org/vocab/InC-EDU/1.0/', service => []);
 test_psgi $app, sub {
     my ($cb, $res) = @_;
 
     $res = $cb->(GET "/example/pct:50");
     is $res->code, 303, "redirect to canonical request";
     is $res->header('Location'), "https://example.org/iiif/example/full/150,100/0/default.jpg";
+
+    $res = $cb->(GET "/example/info.json");
+    my $info = decode_json($res->content);
+    is_deeply [ sort keys %$info ], [qw(@context extraFeatures extraFormats extraQualities 
+        height id profile protocol rights service type width)], 'info response';
 };
 
 test_psgi( IIIF::ImageAPI->new( images => 't/img', magick_args => [qw(-xxx)] ), sub {

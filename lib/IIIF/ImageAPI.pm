@@ -18,7 +18,8 @@ use Plack::MIME;
 use Cwd;
 use Plack::Util;
 
-use Plack::Util::Accessor qw(images base cache formats canonical magick_args);
+use Plack::Util::Accessor
+  qw(images base cache formats rights service canonical magick_args);
 
 our @FORMATS = qw(jpg png gif);
 
@@ -55,11 +56,7 @@ sub response {
         return redirect( $file->{id} . "/info.json" );
     }
     elsif ( $local eq 'info.json' ) {
-        return json_response(
-            200,
-            info( $file->{path}, id => $file->{id}, profile => 'level2' ),
-'application/ld+json;profile="http://iiif.io/api/image/3/context.json"'
-        );
+        return $self->info_response($file);
     }
 
     # allow abbreviated requests, redirect to full form
@@ -112,6 +109,38 @@ sub response {
     }
 
     error_response( 500, "Conversion failed" );
+}
+
+sub info_response {
+    my ( $self, $file ) = @_;
+
+    my $info = info(
+        $file->{path},
+        id      => $file->{id},
+        profile => 'level2',
+
+        # TODO: maxWidth or maxArea, maxHeight (required!)
+
+        extraQualities => [qw(color gray bitonal default)],
+        extraFormats   => $self->formats,
+        extraFeatures  => [
+            qw(
+              baseUriRedirect cors jsonldMediaType mirroring
+              profileLinkHeader
+              regionByPct regionByPx regionSquare rotationArbitrary rotationBy90s
+              sizeByConfinedWh sizeByH sizeByPct sizeByW sizeByWh sizeUpscaling
+              )
+        ]
+    );
+
+    # TODO: canonicalLinkHeader?
+
+    $info->{rights}  = $self->rights  if $self->rights;
+    $info->{service} = $self->service if $self->service;
+
+    return json_response( 200, $info,
+        'application/ld+json;profile="http://iiif.io/api/image/3/context.json"'
+    );
 }
 
 sub file {
@@ -222,6 +251,16 @@ and include (disabled by default).
 =item formats
 
 List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. 
+
+=item rights
+
+Optional string that identifies a license or rights statement for all images,
+to be included in image information responses.
+
+=item service
+
+Optional array with L<Services|https://iiif.io/api/image/3.0/#58-linking-properties>
+to be included in image information responses.
 
 =item magick_args
 
