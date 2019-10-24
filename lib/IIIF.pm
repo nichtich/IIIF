@@ -69,6 +69,9 @@ level, (>90% on branch level and >70% on condition level).
 
 =head1 INSTALLATION
 
+See also L<IIIF::Magick/REQUIREMENTS> for additional installation for optional
+features.
+
 =head1 UNIX
 
 Most Unixes include system Perl by default. You should also install ImageMagick and

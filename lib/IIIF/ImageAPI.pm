@@ -251,7 +251,9 @@ and include (disabled by default).
 
 =item formats
 
-List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default.
+List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. On
+configuration with other formats make sure ImageMagick supports them (see
+L<IIIF::Magick/REQUIREMENTS>).
 
 =item rights
 

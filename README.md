@@ -27,6 +27,9 @@ select rotation and quality...).
 
 # INSTALLATION
 
+See also ["REQUIREMENTS" in IIIF::Magick](https://metacpan.org/pod/IIIF::Magick#REQUIREMENTS) for additional installation for optional
+features.
+
 # UNIX
 
 Most Unixes include system Perl by default. You should also install ImageMagick and
