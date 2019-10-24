@@ -14,7 +14,11 @@ use JSON::PP;
 use File::Temp qw(tempdir);
 use Digest::MD5 qw(md5_hex);
 use HTTP::Date;
+
 use Plack::MIME;
+Plack::MIME->add_type( '.jp2',  'image/jp2' );
+Plack::MIME->add_type( '.webp', 'image/webp' );
+
 use Cwd;
 use Plack::Util;
 
@@ -223,7 +227,7 @@ IIIF::ImageAPI - IIIF Image API implementation as Plack application
         IIIF::ImageAPI->new(
             images  => 'path/to/images',
             base    => 'https://example.org/iiif/',
-            formats => [qw(jpg png gif tif pdf webp)],
+            formats => [qw(jpg png gif tif pdf webp jp2)],
         );
     }
 
