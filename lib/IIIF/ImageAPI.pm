@@ -221,8 +221,9 @@ IIIF::ImageAPI - IIIF Image API implementation as Plack application
     builder {
         enable 'CrossOrigin', origins => '*';
         IIIF::ImageAPI->new(
-            images => 'path/to/images',
-            base   => 'https://example.org/iiif/'
+            images  => 'path/to/images',
+            base    => 'https://example.org/iiif/',
+            formats => [qw(jpg png gif pdf webp)],
         );
     }
 
@@ -250,7 +251,7 @@ and include (disabled by default).
 
 =item formats
 
-List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. 
+List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default.
 
 =item rights
 
@@ -264,7 +265,8 @@ to be included in image information responses.
 
 =item magick_args
 
-Additional command line arguments always used when calling ImageMagick. For instance C<[qw(-limit memory 1GB -limit disk 1GB)]> to limit resources.
+Additional command line arguments always used when calling ImageMagick. For
+instance C<[qw(-limit memory 1GB -limit disk 1GB)]> to limit resources.
 
 =back
 
