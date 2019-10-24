@@ -20,7 +20,10 @@ based on the [ImageMagick](https://www.imagemagick.org/) command line applicatio
 select rotation and quality...).
 - Web service ([IIIF::ImageAPI](https://metacpan.org/pod/IIIF::ImageAPI)) and command line client ([i3f](https://metacpan.org/pod/i3f))
 - Heavily tested
-    - passing the [IIIF Image API Validator](https://iiif.io/api/image/validator/)
+    - fully passing the [IIIF Image API Validator](https://iiif.io/api/image/validator/)
+    with all Level 2 plus all optional features expect `Canonical Link Header`
+    and some [inexplicable test failures](https://github.com/nichtich/IIIF/issues/8#issuecomment-545852786)
+    with PDF, WebP, and JP2 format.
     - works with ImageMagick 6 (tested on Ubuntu Linux) and ImageMagick 7 (tested on Windows)
     - 100% [test coverage](https://coveralls.io/github/nichtich/IIIF) on statement
     level, (>90% on branch level and >70% on condition level).

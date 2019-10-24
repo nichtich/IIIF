@@ -52,7 +52,10 @@ Heavily tested
 
 =item
 
-passing the L<IIIF Image API Validator|https://iiif.io/api/image/validator/>
+fully passing the L<IIIF Image API Validator|https://iiif.io/api/image/validator/>
+with all Level 2 plus all optional features expect C<Canonical Link Header>
+and some L<inexplicable test failures|https://github.com/nichtich/IIIF/issues/8#issuecomment-545852786>
+with PDF, WebP, and JP2 format.
 
 =item
 

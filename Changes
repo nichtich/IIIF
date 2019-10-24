@@ -1,6 +1,10 @@
 Revision history for Perl extension IIIF
 
 {{$NEXT}}
+    - Extend documentation
+    - Propagate features in JSON response
+    - Fix WebP and JPEG 2000 MIME types
+    - Fix protocol in info.json
 
 0.05 2019-10-11T09:42:41Z
     - major cleanup
