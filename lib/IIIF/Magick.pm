@@ -161,6 +161,18 @@ parameters to L<ImageMagick|https://www.imagemagick.org/> command line
 arguments. See L<i3f> (command line) and L<IIIF::ImageAPI> (web service)
 for applications that make use of it.
 
+=head1 REQUIREMENTS
+
+Function C<info> and C<convert> require ImageMagick to be installed. Converting
+to PDF and/or WebP may not be enabled by default. For instance at Ubuntu Linux
+remove the line
+
+  <policy domain="coder" rights="none" pattern="PDF" />
+
+fro C</etc/ImageMagick*/policy.xml> and install WebP support via:
+
+  sudo apt-get install webp libwebp-dev
+
 =head1 FUNCTIONS
 
 =head2 available
