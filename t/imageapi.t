@@ -52,7 +52,8 @@ test_psgi $app, sub {
 };
 
 $app = IIIF::ImageAPI->new(
-    images => 't/img', canonical => 1, base => "https://example.org/iiif/",
+    images => sub { "t/img/$_[0].jpg"; },
+    canonical => 1, base => "https://example.org/iiif/",
     rights => 'http://rightsstatements.org/vocab/InC-EDU/1.0/', service => []);
 test_psgi $app, sub {
     my ($cb, $res) = @_;

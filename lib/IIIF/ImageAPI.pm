@@ -147,15 +147,28 @@ sub info_response {
     );
 }
 
+sub find_file {
+    my ( $self, $identifier ) = @_;
+
+    foreach ( @{ $self->formats } ) {
+        my $file = File::Spec->catfile( $self->images, "$identifier.$_" );
+        return $file if -r $file;
+    }
+}
+
 sub file {
     my ( $self, $identifier ) = @_;
 
-    for my $format ( @{ $self->formats } ) {
-        my $path = File::Spec->catfile( $self->images, "$identifier.$format" );
-        if ( -r $path ) {
+    my $path =
+      ref $self->images eq 'CODE'
+      ? $self->images->($identifier)
+      : $self->find_file($identifier);
+
+    if ( -f $path && $path =~ /\.([^.]+)$/ ) {
+        if ( grep { $1 eq $_ } @{ $self->formats } ) {
             return {
                 path   => $path,
-                format => $format
+                format => $1
             };
         }
     }
@@ -169,8 +182,8 @@ sub redirect {
 sub image_response {
     my ($file) = @_;
 
-    open my $fh, "<:raw", $file
-      or return error_response( 403, "Forbidden" );
+    open my $fh, " < : raw ", $file
+      or return error_response( 403, " Forbidden " );
 
     my $type = Plack::MIME->mime_type($file) // 'image';
     my @stat = stat $file;
@@ -207,7 +220,7 @@ sub json_response {
 sub error_response {
     my $code = shift // 400;
     my $message = shift
-      // "Invalid IIIF Image API Request: region or size out of bounds";
+      // " Invalid IIIF Image API Request : region or size out of bounds ";
     json_response( $code, { message => $message } );
 }
 
@@ -237,7 +250,8 @@ IIIF::ImageAPI - IIIF Image API implementation as Plack application
 
 =item images
 
-Image directory
+Either an image directory (set to the current directory by default) or a code
+reference of a function that maps image identifiers to image files.
 
 =item cache
 
