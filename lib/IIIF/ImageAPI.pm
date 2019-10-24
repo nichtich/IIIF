@@ -179,7 +179,7 @@ sub image_response {
             'Content-Type'   => $type,
             'Content-Length' => $stat[7],
             'Last-Modified'  => HTTP::Date::time2str( $stat[9] ),
-            'Link' => 'http://iiif.io/api/image/3/level2.json>;rel="profile"'
+            'Link' => '<http://iiif.io/api/image/3/level2.json>;rel="profile"'
         ],
         $fh,
     ];
@@ -194,7 +194,7 @@ sub json_response {
         $code,
         [
             'Content-Type' => $type // 'application/json',
-            'Link' => 'http://iiif.io/api/image/3/level2.json>;rel="profile"'
+            'Link' => '<http://iiif.io/api/image/3/level2.json>;rel="profile"'
         ],
         [ $JSON->encode($body) ]
     ];
@@ -223,7 +223,7 @@ IIIF::ImageAPI - IIIF Image API implementation as Plack application
         IIIF::ImageAPI->new(
             images  => 'path/to/images',
             base    => 'https://example.org/iiif/',
-            formats => [qw(jpg png gif pdf webp)],
+            formats => [qw(jpg png gif tif pdf webp)],
         );
     }
 
