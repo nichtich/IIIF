@@ -25,7 +25,9 @@ IIIF - IIIF Image API implementation
 =head1 DESCRIPTION
 
 Package IIIF provides an implementation of L<IIIF ImageAPI|https://iiif.io/api/image/3.0/>
-based on the L<ImageMagick|https://www.imagemagick.org/> command line application.
+based on the L<ImageMagick|https://www.imagemagick.org/> command line application: Requests
+to get a specific segment of an image are mapped to command line arguments of ImageMagick
+to perform the requested segment extraction. See L<i3f/EXAMPLES> for examples.
 
 =head1 FEATURES
 

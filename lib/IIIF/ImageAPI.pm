@@ -23,7 +23,7 @@ use Cwd;
 use Plack::Util;
 
 use Plack::Util::Accessor
-  qw(images base cache formats rights service canonical magick_args preferredFormats);
+  qw(images base cache formats rights service canonical magick_args preferredFormats maxWidth maxHeight maxArea);
 
 our @FORMATS = qw(jpg png gif);
 
@@ -93,6 +93,7 @@ sub response {
         return image_response( $file->{path} );
     }
 
+    # cache image segment and directly serve if found
     my $cache = $self->cache // $self->cache( tempdir( CLEANUP => 1 ) );
     my $cache_file = File::Spec->catfile( $cache,
         md5_hex("$request") . ".$request->{format}" );
@@ -102,12 +103,13 @@ sub response {
     }
     else {
 
-        # TODO: only get image dimensions once and only if actually needed
+        # get image dimensions to check whether request is possible
         my $info = info( $file->{path} );
-        if ( !$request->canonical( $info->{width}, $info->{height} ) ) {
+        if ( !$request->canonical( $info->{width}, $info->{height}, %$self ) ) {
             return error_response();
         }
 
+        # apply request and return result
         my @args = ( $request, $file->{path}, $cache_file );
         push @args, @{ $self->{magick_args} || [] };
         return image_response($cache_file) if convert(@args);
@@ -124,8 +126,6 @@ sub info_response {
         id      => $file->{id},
         profile => 'level2',
 
-        # TODO: maxWidth or maxArea, maxHeight (required!)
-
         extraQualities => [qw(color gray bitonal default)],
         extraFormats   => $self->formats,
         extraFeatures  => [
@@ -137,6 +137,9 @@ sub info_response {
               )
         ]
     );
+
+    $info->{$_} = $self->{$_}
+      for grep { $self->{$_} } qw(maxWidth maxHeight maxArea);
 
     if ( $self->preferredFormats ) {
         $info->{preferredFormats} = $self->preferredFormats;
@@ -283,6 +286,18 @@ L<IIIF::Magick/REQUIREMENTS>).
 Optional list of preferred image formats. MUST be a subset of or equal to
 C<formats>. The first preferred format, if given, will be used as default if a
 request does no specify a file format.
+
+=item maxWidth
+
+Optional maximum width in pixels to be supported.
+
+=item maxHeight
+
+Optional maximum height in pixels to be supported.
+
+=item maxArea
+
+Optional maximum pixel area (width x height) to be supported.
 
 =item rights
 

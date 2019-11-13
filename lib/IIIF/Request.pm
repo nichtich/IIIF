@@ -103,7 +103,7 @@ sub error {
 }
 
 sub canonical {
-    my ( $self, $width, $height ) = @_;
+    my ( $self, $width, $height, %max ) = @_;
 
     # convert region to /full|x,y,w,h/
     my $region = $self->{region};
@@ -262,12 +262,15 @@ Returns the full request string. Percentage values and degrees are normalized.
 Returns whether the request (without format) is the default request
 C<full/max/0/default> to get an unmodified image.
 
-=head2 canonical( $width, $height )
+=head2 canonical( $width, $height [, %max ] )
 
 Returns the L<canonical request|https://iiif.io/api/image/3.0/#47-canonical-uri-syntax>
 for an image of given width and height or C<undef> if this would result in an
 invalid request (because region or size would be out of bounds). In contrast to
 the specification, the C<format> is not required part of the canonical request.
+
+Checking of C<maxWidth>, C<maxHeight>, C<maxArea> (passed as optional arguments
+in C<%max>) is not implemented yet.
 
 =head2 error
 
