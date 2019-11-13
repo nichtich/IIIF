@@ -23,7 +23,7 @@ use Cwd;
 use Plack::Util;
 
 use Plack::Util::Accessor
-  qw(images base cache formats rights service canonical magick_args);
+  qw(images base cache formats rights service canonical magick_args preferredFormats);
 
 our @FORMATS = qw(jpg png gif);
 
@@ -69,7 +69,8 @@ sub response {
         return error_response( 400, ( split( " at ", $@ ) )[0] );
     }
 
-    $request->{format} = $request->{format} // $file->{format};
+    $request->{format} = $request->{format}
+      // ( $self->{preferredFormats} || [] )->[0] // $file->{format};
 
     return error_response( 400, "unsupported format" )
       unless grep { $_ eq $request->{format} } @{ $self->formats };
@@ -136,6 +137,10 @@ sub info_response {
               )
         ]
     );
+
+    if ( $self->preferredFormats ) {
+        $info->{preferredFormats} = $self->preferredFormats;
+    }
 
     # TODO: canonicalLinkHeader?
 
@@ -272,6 +277,12 @@ and include (disabled by default).
 List of supported image formats. Set to C<['jpg', 'png', 'gif']> by default. On
 configuration with other formats make sure ImageMagick supports them (see
 L<IIIF::Magick/REQUIREMENTS>).
+
+=item preferredFormats
+
+Optional list of preferred image formats. MUST be a subset of or equal to
+C<formats>. The first preferred format, if given, will be used as default if a
+request does no specify a file format.
 
 =item rights
 
