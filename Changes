@@ -1,6 +1,7 @@
 Revision history for Perl extension IIIF
 
 {{$NEXT}}
+    - support maxWidth and maxHeight (to some degree, see #6)
 
 0.06 2019-10-24T10:28:48Z
     - Extend documentation

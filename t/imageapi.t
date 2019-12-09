@@ -56,9 +56,9 @@ $app = IIIF::ImageAPI->new(
     images    => sub { "t/img/$_[0].jpg"; },
     canonical => 1,
     base      => "https://example.org/iiif/",
-    rights  => 'http://rightsstatements.org/vocab/InC-EDU/1.0/',
-    maxArea => 1000000,
-    service => []
+    rights    => 'http://rightsstatements.org/vocab/InC-EDU/1.0/',
+    maxHeight => 300,
+    service   => []
 );
 test_psgi $app, sub {
     my ( $cb, $res ) = @_;
@@ -72,9 +72,11 @@ test_psgi $app, sub {
     my $info = decode_json( $res->content );
     is_deeply [ sort keys %$info ], [
         qw(@context extraFeatures extraFormats extraQualities
-          height id maxArea profile protocol rights service type width)
+          height id maxHeight profile protocol rights service type width)
       ],
       'info response';
+
+    # TODO: maxHeight
 };
 
 test_psgi(

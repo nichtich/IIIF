@@ -77,7 +77,8 @@ sub response {
 
     if ( $self->canonical ) {
         my $info = info( $file->{path} );
-        my $canonical = $request->canonical( $info->{width}, $info->{height} )
+        my $canonical =
+          $request->canonical( $info->{width}, $info->{height}, %$self )
           or return error_response();
         $request = IIIF::Request->new($canonical);
     }
@@ -88,7 +89,7 @@ sub response {
 
     # Image Request
 
-    # directly serve unmodified image
+    # directly serve unmodified image (FIXME: respect maxWidth/maxHeight)
     if ( $request->is_default && $request->{format} eq $file->{format} ) {
         return image_response( $file->{path} );
     }
@@ -103,11 +104,16 @@ sub response {
     }
     else {
 
-        # get image dimensions to check whether request is possible
+        # always use canonical request to improve caching
         my $info = info( $file->{path} );
-        if ( !$request->canonical( $info->{width}, $info->{height}, %$self ) ) {
+        my $canonical =
+          $request->canonical( $info->{width}, $info->{height}, %$self );
+
+        if ( !$canonical ) {
             return error_response();
         }
+
+        $request = IIIF::Request->new($canonical);
 
         # apply request and return result
         my @args = ( $request, $file->{path}, $cache_file );
