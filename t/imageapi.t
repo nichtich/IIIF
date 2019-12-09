@@ -42,11 +42,17 @@ test_psgi $app, sub {
     $res = $cb->( GET "/$identifier/full/pct:0.01/0/default.png" );
     is $res->code, 400, "invalid image request (image size)";
 
-    $res = $cb->( GET "/$identifier/0,0,10,10/max/0/default.png" );
-    is $res->code, 200, "valid image request";
+    my $links = [ 
+      '<http://iiif.io/api/image/3/level2.json>;rel="profile"',
+      "<http://localhost/$identifier/0,0,10,10/max/0/default.png>;rel=\"canonical\"" ];
 
     $res = $cb->( GET "/$identifier/0,0,10,10/max/0/default.png" );
+    is $res->code, 200, "valid image request";
+    is_deeply [ sort $res->header('Link') ], $links, "Link headers";
+
+    $res = $cb->( GET "/$identifier/0,0,10,10/10,10/0/default.png" );
     is $res->code, 200, "valid image request (from cache)";
+    is_deeply [ sort $res->header('Link') ], $links, "Link headers";
 
     $res = $cb->( GET "/$identifier/0,0,10,10/max/0/default.xxx" );
     is $res->code, 400, "unsupported format";

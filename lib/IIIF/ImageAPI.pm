@@ -75,23 +75,25 @@ sub response {
     return error_response( 400, "unsupported format" )
       unless grep { $_ eq $request->{format} } @{ $self->formats };
 
-    if ( $self->canonical ) {
-        my $info = info( $file->{path} );
-        my $canonical =
-          $request->canonical( $info->{width}, $info->{height}, %$self )
-          or return error_response();
-        $request = IIIF::Request->new($canonical);
+    if ( !$self->canonical && "$request" ne $local ) {
+        return redirect( $file->{id} . "/$request" );
     }
 
-    if ( "$request" ne $local ) {
-        return redirect( $file->{id} . "/$request" );
+    my $info = info( $file->{path} );
+    my $norm = $request->canonical( $info->{width}, $info->{height}, %$self )
+      or return error_response();
+    $request = IIIF::Request->new($norm);
+    my $canonical = $file->{id} . "/$request";
+
+    if ( $self->canonical && "$request" ne $local ) {
+        return redirect($canonical);
     }
 
     # Image Request
 
-    # directly serve unmodified image (FIXME: respect maxWidth/maxHeight)
+    # directly serve unmodified image
     if ( $request->is_default && $request->{format} eq $file->{format} ) {
-        return image_response( $file->{path} );
+        return image_response( $file->{path}, $canonical );
     }
 
     # cache image segment and directly serve if found
@@ -100,25 +102,12 @@ sub response {
         md5_hex("$request") . ".$request->{format}" );
 
     if ( -r $cache_file ) {
-        return image_response($cache_file);
+        return image_response( $cache_file, $canonical );
     }
     else {
-
-        # always use canonical request to improve caching
-        my $info = info( $file->{path} );
-        my $canonical =
-          $request->canonical( $info->{width}, $info->{height}, %$self );
-
-        if ( !$canonical ) {
-            return error_response();
-        }
-
-        $request = IIIF::Request->new($canonical);
-
-        # apply request and return result
         my @args = ( $request, $file->{path}, $cache_file );
         push @args, @{ $self->{magick_args} || [] };
-        return image_response($cache_file) if convert(@args);
+        return image_response( $cache_file, $canonical ) if convert(@args);
     }
 
     error_response( 500, "Conversion failed" );
@@ -136,7 +125,7 @@ sub info_response {
         extraFormats   => $self->formats,
         extraFeatures  => [
             qw(
-              baseUriRedirect cors jsonldMediaType mirroring
+              baseUriRedirect canonicalLinkHeader cors jsonldMediaType mirroring
               profileLinkHeader
               regionByPct regionByPx regionSquare rotationArbitrary rotationBy90s
               sizeByConfinedWh sizeByH sizeByPct sizeByW sizeByWh sizeUpscaling
@@ -194,9 +183,9 @@ sub redirect {
 
 # adopted from Plack::App::File
 sub image_response {
-    my ($file) = @_;
+    my ( $file, $canonical ) = @_;
 
-    open my $fh, " < : raw ", $file
+    open my $fh, "<:raw", $file
       or return error_response( 403, " Forbidden " );
 
     my $type = Plack::MIME->mime_type($file) // 'image';
@@ -210,7 +199,8 @@ sub image_response {
             'Content-Type'   => $type,
             'Content-Length' => $stat[7],
             'Last-Modified'  => HTTP::Date::time2str( $stat[9] ),
-            'Link' => '<http://iiif.io/api/image/3/level2.json>;rel="profile"'
+            'Link' => '<http://iiif.io/api/image/3/level2.json>;rel="profile"',
+            'Link' => "<$canonical>;rel=\"canonical\""
         ],
         $fh,
     ];
@@ -269,7 +259,9 @@ reference of a function that maps image identifiers to image files.
 
 =item cache
 
-Cache directory. Set to a temporary per-process directory by default.
+Cache directory. Set to a temporary per-process directory by default. Please
+use different cache directories for different settings of C<maxWidth> and
+C<maxHeight>.
 
 =item base
 
@@ -279,7 +271,7 @@ required if the service is put behind a web proxy.
 =item canonical
 
 Redirect requests to the L<canonical URI syntax|https://iiif.io/api/image/3.0/#47-canonical-uri-syntax>
-and include (disabled by default).
+and include (disabled by default). A canonical Link header is set anyway.
 
 =item formats
 
